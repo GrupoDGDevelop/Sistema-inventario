@@ -25,7 +25,7 @@ create table servicio(
 --Tabla Dispositivo
 create table dispositivo(
 	id_dispositivo serial primary key,
-	fk_servicio integer not null,
+	fk_servicio integer null,
 	nom_dispositivo varchar(35) not null unique,
 	FOREIGN KEY (fk_servicio) REFERENCES servicio(id_servicio)
 );
@@ -33,7 +33,7 @@ create table dispositivo(
 --Tabla Mantenimiento
 CREATE TABLE mantenimientos (
     id_mantenimiento serial PRIMARY KEY,
-	fk_servicio integer not null,
+	fk_servicio integer null,
     fecha_mant TIMESTAMP,
     asunto VARCHAR(100),
     observaciones VARCHAR(250),
@@ -44,7 +44,7 @@ CREATE TABLE mantenimientos (
 --Tabla Usuario
 CREATE TABLE usuario (
     id_usuario SERIAL PRIMARY KEY,
-	fk_agencia integer not null,
+	fk_agencia integer null,
     nombre_u VARCHAR(35),
     apellido_u VARCHAR(35),
     correo_u VARCHAR(50),
@@ -57,25 +57,25 @@ CREATE TABLE usuario (
 --Tabla Administrador
 CREATE TABLE administrador (
     id_admin SERIAL PRIMARY KEY,
-	fk_agencia integer not null,
+	fk_agencia integer null,
     nombre_a VARCHAR(35),
     apellido_a VARCHAR(35),
     correo_a VARCHAR(50),
     password_a TEXT,
     notificaciones_a BOOLEAN,
     status_usuario BOOLEAN,
-    permisos VARCHAR(16),
+    permisos VARCHAR(20),
     CONSTRAINT fk_agencia FOREIGN KEY (fk_agencia) REFERENCES agencia(id_agencia)
 );
 
 --Tabla Ticket
 CREATE TABLE ticket (
     id_ticket SERIAL PRIMARY KEY,
-	fk_status integer not null,
-    fk_dispositivo integer not null,
-    fk_departamento integer not null,
-    fk_usuario integer not null,
-    fk_administrador integer not null,
+	fk_status integer null,
+    fk_dispositivo integer null,
+    fk_departamento integer null,
+    fk_usuario integer null,
+    fk_administrador integer null,
     num_ticket BIGINT,
     fecha_ini TIMESTAMP,
     fecha_fin TIMESTAMP,

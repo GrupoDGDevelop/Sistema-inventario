@@ -30,16 +30,6 @@ create table dispositivo(
 	FOREIGN KEY (fk_servicio) REFERENCES servicio(id_servicio)
 );
 
---Tabla Mantenimiento
-CREATE TABLE mantenimientos (
-    id_mantenimiento serial PRIMARY KEY,
-	fk_servicio integer null,
-    fecha_mant TIMESTAMP,
-    asunto VARCHAR(100),
-    observaciones VARCHAR(250),
-    encargado VARCHAR(35),
-    FOREIGN KEY (fk_Servicio) REFERENCES servicio(id_servicio)
-);
 
 --Tabla Usuario
 CREATE TABLE usuario (
@@ -66,6 +56,17 @@ CREATE TABLE administrador (
     status_usuario BOOLEAN,
     permisos VARCHAR(20),
     CONSTRAINT fk_agencia FOREIGN KEY (fk_agencia) REFERENCES agencia(id_agencia)
+);
+
+--Tabla Mantenimiento
+CREATE TABLE mantenimientos (
+    id_mantenimiento serial PRIMARY KEY,
+	fk_administrador integer null,
+    fecha_mant TIMESTAMP,
+    asunto VARCHAR(100),
+    observaciones VARCHAR(250),
+    encargado VARCHAR(35),
+    FOREIGN KEY (fk_administrador) REFERENCES administrador(id_admin)
 );
 
 --Tabla Ticket

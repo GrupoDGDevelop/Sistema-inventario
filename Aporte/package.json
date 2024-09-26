@@ -1,0 +1,21 @@
+{
+  "name": "aporte",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon ./src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^4.19.2",
+    "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
+    "nodemon": "^3.1.4"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.5",
+    "notenv": "^2.0.3"
+  }
+}

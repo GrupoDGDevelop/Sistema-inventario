@@ -1,2 +1,0 @@
-# Estadias
-Proyecto Estadias

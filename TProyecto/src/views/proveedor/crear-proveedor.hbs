@@ -1,0 +1,22 @@
+<div class="mb-4">
+    <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span class="ml-2">Regresar</span>
+    </button>
+</div>
+
+<div class="block mx-auto my-12 p-8 bg-white w-1/3 border border-gray-200 rounded-lg shadow-lg text-gray-800">
+    <h1 class="text-center text-3xl font-bold">Crear Proveedor</h1>
+
+    <form action="/crearProveedor" method="POST" class="mt-4">
+        <!-- Campo para Nombre del Proveedor -->
+        <input type="text" class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
+            p-2 my-2 focus:bg-white" placeholder="Nombre del Proveedor" name="Nom_Proveedor" required>
+
+        <!-- Botón de enviar -->
+        <button type="submit" class="rounded-md bg-gray-500 w-full text-lg text-white font-semibold p-2 my-3
+            hover:bg-gray-500 focus:bg-gray-700">Guardar</button>
+    </form> 
+</div>

@@ -1,0 +1,5 @@
+La documentacion va aqui
+NOTAS:
+Para ingresar al proyecto con la base de datos establecida, recordar que el usuario y contraseñ es:
+Correo: yoshrma99@gmail.com
+password: 9988

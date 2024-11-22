@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Imprimir Carta</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      line-height: 1.5;
+    }
+    .container {
+      width: 100%;
+      margin: 0 auto;
+      border: 1px solid #ccc;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center; /* Centra los logos en el espacio disponible */
+      gap: 20px; /* Espacio entre los logos */
+    }
+    .header img {
+      height: 50px;
+      margin: 0; /* Elimina el margen adicional entre los logos */
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-weight: bold;
+      background-color: #007bff;
+      color: white;
+      padding: 5px;
+    }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .table th,
+    .table td {
+      border: 1px solid #ccc;
+      padding: 5px;
+      text-align: left;
+    }
+    .table th {
+      background-color: #007bff;
+      color: white;
+    }
+    .signature {
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .signature div {
+      text-align: center;
+    }
+    .btn-download {
+      display: inline-block;
+      background-color: #28a745;
+      color: white;
+      padding: 10px 15px;
+      text-align: center;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      cursor: pointer;
+    }
+    .btn-download:hover {
+      background-color: #218838;
+    }
+
+    /* --- Estilos de impresión --- */
+    @media print {
+      body {
+        margin: 0;
+        padding: 0;
+        -webkit-print-color-adjust: exact; /* Asegura que los colores se impriman */
+      }
+      .container {
+        border: none;
+        padding: 0;
+      }
+      .section-title {
+        background-color: #007bff;
+        color: white;
+        -webkit-print-color-adjust: exact;
+      }
+      .table th {
+        background-color: #007bff;
+        color: white;
+        -webkit-print-color-adjust: exact;
+      }
+      .btn-download {
+        display: none; /* Oculta el botón Descargar al imprimir */
+      }
+      .no-print {
+        display: none; /* Oculta cualquier elemento fuera del área imprimible */
+      }
+      .page-break {
+        page-break-after: always; /* Fuerza un salto de página */
+      }
+    }
+  </style>
+</head>
+
+<body>
+      <!-- Botón de retroceso -->
+      <div class="mb-4 no-print">
+          <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          <span class="ml-2">Regresar</span>
+          </button>
+      </div>
+
+  <div class="container">
+    <!-- Botón de Descargar -->
+    <a href="#" class="btn-download no-print" onclick="printContent()">Imprimir</a>
+
+    <!-- Encabezado -->
+    <div class="header">
+      <img src="/imagenes/grupoDG-logo.png" alt="Grupo Logo">
+      <img src="/imagenes/Volkswagen-logo.png" alt="VW Logo">
+      <img src="/imagenes/SEAT-logo.png" alt="SEAT Logo">
+      <img src="/imagenes/CUPRA-logo.png" alt="CUPRA Logo">
+    </div>
+
+    <!-- Descripción del Equipo -->
+    <div class="section">
+      <div class="section-title">Descripción del Equipo</div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Características</th>
+            <th>No. Serie</th>
+            <th>Proveedor</th>
+            <th>Precio Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{carta.Nom_Producto}}</td>
+            <td>{{carta.Nom_Marca}}</td>
+            <td>{{carta.Modelo}}</td>
+            <td>{{carta.Caracteristicas}}</td>
+            <td>{{carta.Num_Serie}}</td>
+            <td>{{carta.Nom_Proveedor}}</td>
+            <td>{{carta.Precio_Total}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Descripción del Software -->
+    <div class="section">
+      <div class="section-title">Descripción de Software</div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Software</th>
+            <th>Versión</th>
+            <th>Licencias</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{carta.Nom_Software}}</td>
+            <td>{{carta.Version}}</td>
+            <td>{{carta.Licencia}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Datos de Agencia -->
+    <div class="section">
+      <div class="section-title">Datos de Agencia</div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Agencia</th>
+            <th>N° Agencia</th>
+            <th>Departamento</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{carta.Nom_Agencia}}</td>
+            <td>{{carta.Num_Agencia}}</td>
+            <td>{{carta.Departamento}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Descripción del Usuario -->
+    <div class="section">
+      <div class="section-title">Firma de Usuario</div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Puesto</th>
+            <th>Firma</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>.</td>
+            <td>.</td>
+            <td>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Firmas -->
+    <div class="section">
+      <div class="section-title">Firma del Usuario</div>
+      <div class="signature">
+        <div>
+          <p>.</p>
+          <p>________________________</p>
+          <p>Nombre y Firma de Gerente de Área</p>
+        </div>
+        <div>
+          <p>.</p>
+          <p>_________________________</p>
+          <p>Nombre y Firma de Gerente Operativo o General</p>
+        </div>
+        <div>
+          <td>{{carta.Nombre_U}}</td>
+          <p>_________________________</p>
+          <p>Firma de Responsable de Sistemas</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="page-break"></div>
+
+        <!-- Encabezado -->
+<!-- Segunda Hoja -->
+<!-- Segunda Hoja -->
+<div class="container" style="font-size: 12px;"> <!-- Reducimos el tamaño de la letra -->
+  <div class="header">
+    <img src="/imagenes/grupoDG-logo.png" alt="Grupo Logo">
+    <img src="/imagenes/Volkswagen-logo.png" alt="VW Logo">
+    <img src="/imagenes/SEAT-logo.png" alt="SEAT Logo">
+    <img src="/imagenes/CUPRA-logo.png" alt="CUPRA Logo">
+  </div>
+
+  <!-- Texto de la carta responsiva -->
+  <div class="section">
+    <h2 class="section-title">CARTA RESPONSIVA</h2>
+    <p><strong>Política sobre el uso de programas, equipos y accesorios</strong></p>
+    <ol>
+      <li>1.  Recibo {{carta.Resumen}} con Software instalados descritos en esta responsiva, como herramienta de trabajo. Manifiesto darle un uso, destino único y exclusivamente para el desempeño de mis funciones y actividades encomendadas por la empresa Grupo DG. Según las leyes de derechos de autor, las personas implicadas en la reproducción ilegal de software pueden ser demandadas por daños y perjuicios y enfrentar penas criminales, incluyendo multas y prisión. Grupo DG no autoriza la reproducción de copias de software en ninguno de sus equipos, ni el uso de copias no autorizadas. El uso de programas de computadora será sancionado según las leyes aplicables y será motivo de rescisión de contrato laboral.</li>
+      <li>2.  Cualquier empleado que de forma indebida copie o instale un programa de computadora deberá ser responsable de cualquier daño al equipo de cómputo.</li>
+      <li>3.  Queda estrictamente prohibida la reproducción, copia, préstamo, transferencia o uso de software sin licencia o sin la debida autorización, así como el almacenamiento de material no autorizado en los equipos de cómputo del Grupo DG.</li>
+      <li>4.  Todas las contraseñas de acceso a las aplicaciones instaladas o transferidas es absoluta responsabilidad del empleado en el momento en que se le asigne. Esto también será extensivo si el caso de que surja algún daño o se alteren los datos que se encuentran en uso por otras áreas relacionadas o relacionadas con el trabajo asignado.</li>
+      <li>5.  En el momento en que se me asignen programas, equipos y accesorios por parte de Grupo DG, y por tratarse de equipo de cómputo y software mencionado, las mismas serán utilizadas única y exclusivamente con fines laborales.</li>
+      <li>6.  La información procesada por el uso de estos programas y equipos es propiedad de Grupo DG y por tanto deberá ser clasificada como “Confidencial”. Por tanto, está terminantemente prohibido el acceso, revisión, descarga, divulgación, distribución o cualquier otro uso de dicha información por parte de personal ajeno o fuera de la empresa Grupo DG.</li>
+      <li>7.  En caso de que Grupo DG lo considere necesario, se deberá permitir la revisión del equipo asignado, para determinar el correcto uso de los programas y equipos asignados por Grupo DG.</li>
+      <li>8.  Instancia alguna puede modificar los programas en licencia y autorización, asignados a los equipos de cualquier área de sistemas para uso exclusivo de empleados del Grupo DG.</li>
+    </ol>
+    <p>
+      He recibido información sobre las políticas que Grupo DG dispone con respecto al uso del software y sistemas que cumpla, así como la aceptación del Software instalado en el equipo de cómputo asignado para realizar mis tareas. Al igual, acepto las políticas de las aplicaciones de Software en licencia y previa autorización, asignadas a Grupo DG de todas las áreas designadas en esta ocasión.
+    </p>
+    <p>
+      Para el caso de terminación de la relación laboral por cualquier causa, o bien que se me requiera el equipo en cualquier momento, me obligo a entregar el equipo asignado. Y en el evento de que dicho equipo no se me entregue, se hará uso de mi consentimiento para la deducción de su valor por el salario o pago de nómina. De igual forma me obligo a la reparación del equipo si existe algún daño físico o de software que no sea resultado del uso del trabajo.
+    </p>
+  </div>
+</div>
+
+
+
+</body>
+  <script>
+    function printContent() {
+      window.print();
+    }
+  </script>
+</html>

@@ -1,49 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Login Node.js MySql</title>
-
-    <!-- Tailwind CSS Link -->
-    <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.0.1/tailwind.min.css">
-
-    <!-- Fontawesome Link -->
+    <title>{{title}}</title>
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.0.1/tailwind.min.css">
+    <!-- Fontawesome CSS -->
     <link href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" rel="stylesheet">
-
   </head>
+
   <body class="bg-gray-200">
-    <nav class="flex py-5 bg-green-500 text-white px-24">
-      <div class="w-1/2 px-12 mr-auto">
-        <h1 class="text-2xl font-bold">Prueba Aplicacion</h1>
+
+    {{!-- Verificar si no se debe usar el layout completo --}}
+    {{#unless noLayout}}
+      {{!-- Si el usuario está autenticado, mostrar la estructura completa --}}
+      {{#if isAuthenticated}}
+        <div class="h-screen flex">
+
+          <!-- Barra lateral fija y más estrecha -->
+          <aside class="fixed top-0 left-0 h-full w-16 bg-gray-800 text-white flex flex-col items-center py-3 z-40">
+            <!-- Iconos grandes y centrados -->
+            <a href="/" class="mb-4 mt-12">
+              <i class="fas fa-home text-2xl"></i>
+            </a>
+            <a href="/verCartaR" class="mb-4">
+              <i class="fas fa-file-alt text-2xl"></i>
+            </a>
+            <a href="/servicios" class="mb-4">
+              <i class="fas fa-cog text-2xl"></i>
+            </a>
+            <a href="/verUsuario" class="mb-4">
+              <i class="fas fa-users text-2xl"></i>
+            </a>
+            <a href="/verUsuario" class="mt-auto mb-4">
+              <i class="fas fa-user text-2xl"></i>
+            </a>
+          </aside>
+
+          <!-- Contenido principal ajustado para la barra lateral más estrecha -->
+          <div class="flex-grow flex flex-col ml-16">
+
+            <!-- Barra superior más delgada -->
+            <nav class="fixed top-0 left-16 right-0 flex items-center justify-between bg-gray-800 text-white px-4 py-3 z-50">
+              <div class="text-md font-semibold">{{name}}</div>
+
+              <!-- Botón de logout más pequeño -->
+              <a href="/logout" class="bg-red-500 hover:bg-red-700 py-1 px-3 rounded-md">
+                <i class="fas fa-sign-out-alt"></i>
+              </a>
+            </nav>
+
+            <!-- Ajuste del contenido para la nueva barra superior y lateral -->
+            <div class="flex-grow bg-white p-4 mt-14">
+              {{{body}}}
+            </div>
+
+          </div>
+        </div>
+
+      {{!-- Si no está autenticado, mostrar solo el contenido (Login/Register) --}}
+      {{else}}
+        <div class="flex p-500  items-center justify-center h-screen">
+          <div class="bg-white p-5 rounded-lg shadow-lg w-full max-w-md">
+            {{{body}}}
+          </div>
+        </div>
+      {{/if}}
+    {{else}}
+      <!-- Solo mostrar el contenido (body) cuando noLayout es true -->
+      <div class="flex-grow bg-white p-4 mt-14">
+        {{{body}}}
       </div>
-
-      <ul class="w-1/2 px-16 ml-auto flex justify-end pt-1">
-        {{#if name}}
-        
-        <p>{{name}}</p>
-
-        <li class="nav-item px-4">
-          <a href="/logout" class="nav-link font-semibold bg-red-500 hover:bg-red-700 py-3 px-4 rounded-md">Logout</a>
-        </li>
-
-        {{else}}
-        <li class="nav-item px-4">
-          <a href="/login" class="nav-link font-semibold hover:bg-green-700 py-3 px-4 rounded-md">Login</a>
-        </li>
-
-        <li class="nav-item px-4">
-          <a href="/registro" class="nav-link font-semibold border-2 border-white hover:bg-white hover:text-green-700 py-3
-            px-4 rounded-md">registro</a>
-        </li>
-        {{/if}}
-      </ul>
-    </nav>
-
-    {{{body}}}
-
+    {{/unless}}
 
   </body>
 </html>

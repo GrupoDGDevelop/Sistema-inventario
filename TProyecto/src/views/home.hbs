@@ -1,2 +1,40 @@
 <!DOCTYPE html>
-<h1 class="text-center my-24 text-xl">Bienvenido <b>{{name}}</b></h1>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+  <!-- Contenedor principal -->
+  <div class="container mx-auto my-8">
+    <!-- Mensaje de bienvenida y botón -->
+    <div class="flex justify-between items-center mb-6">
+      <p class="text-center text-gray-800 text-3xl font-semibold">¡Bienvenido! <b>{{name}}</b></p>
+      <a href="/crearCartaR" class="font-semibold bg-green-500 text-xl text-white hover:bg-green-700 px-6 py-3 text-center rounded-md">
+        Crear Carta
+      </a>
+    </div>
+
+    <!-- Galería de cartas -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {{#each cartas}}
+      <a href="/imprimirCartaPDF/{{ID_Carta_R}}" class="block border rounded-lg shadow-md bg-gray-100 hover:shadow-lg">
+        <div class="p-4">
+          <div class="text-lg font-bold text-gray-700">
+            CR-{{ID_Carta_R}} <!-- ID de la Carta -->
+          </div>
+          <div class="text-sm text-gray-500">
+            {{FechaU}} <!-- Fecha de creación -->
+          </div>
+        </div>
+        <div class="p-4">
+          <img src="/imagenes/plantilla-CR.png" alt="Grupo Logo" class="w-full h-90 object-cover rounded-md">
+        </div>
+      </a>
+      {{/each}}
+    </div>
+  </div>
+</body>
+</html>

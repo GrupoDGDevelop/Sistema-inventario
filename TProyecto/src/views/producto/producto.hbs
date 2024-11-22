@@ -1,0 +1,72 @@
+    <div class="mb-4">
+        <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span class="ml-2">Regresar</span>
+        </button>
+    </div>
+    
+  <body class="bg-gray-100">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+      <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-12 p-4">
+        
+        <!-- Botón para añadir un nuevo producto -->
+        <div class="flex justify-between items-center mb-4">
+          <a href="/crearProducto" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+            + Agregar
+          </a>
+
+          <!-- Formulario de búsqueda -->
+          <form action="/verProducto/buscarP" method="POST" class="flex items-center">
+            <label for="search" class="text-gray-700 mr-2">Buscar:</label>
+            <input type="text" name="searchTerm" id="search" class="border rounded px-2 py-1" placeholder="Buscar...">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-2 rounded">
+              Buscar
+            </button>
+          </form>
+        </div>
+
+        <!-- Tabla de productos -->
+        <table class="table-fixed w-full">
+          <thead>
+            <tr class="bg-gray-500 text-white">
+              <th class="w-16 py-4">ID</th>
+              <th class="w-1/4 py-4">Nombre</th>
+              <th class="w-1/6 py-4">Modelo</th>
+              <th class="w-1/6 py-4">Características</th>
+              <th class="w-1/6 py-4">Precio Total</th>
+              <th class="w-1/6 py-4">Marca</th>
+              <th class="w-1/6 py-4">Proveedor</th>
+              <th class="w-28 py-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each product}}
+            <tr class="bg-white border-b">
+              <td class="py-3 px-6">{{ID_Producto}}</td>
+              <td class="p-3">{{Nom_Producto}}</td>
+              <td class="p-3">{{Modelo}}</td>
+              <td class="p-3">{{Caracteristicas}}</td>
+              <td class="p-3">{{Precio_Total}}</td>
+              <td class="p-3">{{Nom_Marca}}</td>
+              <td class="p-3">{{Nom_Proveedor}}</td>
+              <td class="p-3 flex justify-center">
+                <form action="/producto/eliminar" method="POST" class="mx-2">
+                  <input type="hidden" value="{{ID_Producto}}" name="id_P">
+                  <button class="bg-red-500 text-white px-3 py-1 rounded-sm" type="submit">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+                <a href="/producto/editar/{{ID_Producto}}" class="bg-green-500 text-white px-3 py-1 rounded-sm">
+                  <i class="fas fa-pen"></i>
+                </a>
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+

@@ -3,13 +3,36 @@ const PDFDocument = require('pdfkit');
 
 function verCarta(req, res) {
     req.getConnection((err, conn) => {
-        const query = `SELECT * FROM carta_r`; // Tu consulta SQL aquí para ver la carta
+        if (err) {
+            console.error('Error al establecer la conexión:', err);
+            return res.status(500).json(err);
+        }
+
+        const query = `
+            SELECT 
+                carta_r.*,
+                producto.Nom_Producto,
+                sistemas.Nom_Software,
+                agencia.Nom_Agencia,
+                usuario.Nombre_U
+            FROM 
+                carta_r JOIN producto ON carta_r.Fk_Producto = producto.ID_Producto
+            JOIN sistemas ON carta_r.Fk_Sistema = sistemas.ID_Sistemas
+            JOIN agencia ON carta_r.Fk_Agencia = agencia.Id_Area
+            JOIN usuario ON carta_r.Fk_Usuario = usuario.ID_Usuario;
+        `;
+
         conn.query(query, (err, cartas) => {
-            if (err) return res.json(err);
+            if (err) {
+                console.error('Error al ejecutar la consulta:', err);
+                return res.json(err);
+            }
+
             res.render('cartaR/ver-carta', { cartas });
         });
     });
 }
+
 
 function buscarCarta(req, res) {
     const searchTerm = req.body.searchTerm; // Obtén el término de búsqueda desde el formulario

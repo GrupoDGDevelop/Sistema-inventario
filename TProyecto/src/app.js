@@ -82,7 +82,7 @@ app.use('/', isAuthenticated, marcaRutas);
 app.use('/', isAuthenticated, proovedorRutas);
 
 // Ruta para la página de inicio
-// Ruta para la página de inicio
+
 app.get('/', isAuthenticated, async (req, res) => {
     try {
         // Realiza la consulta a la base de datos utilizando `req.getConnection()`

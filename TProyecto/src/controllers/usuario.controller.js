@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
 
+// Función para mostrar todos los usuarios
+// Obtiene una lista de usuarios de la base de datos junto con sus roles y los envía a la vista 'usuario/usuario'.
 function verUsuario(req, res) {
     req.getConnection((err, conn) => {
         const read = `
@@ -16,6 +18,8 @@ function verUsuario(req, res) {
     });
 }
 
+// Función para buscar usuarios por nombre
+// Realiza una búsqueda en la base de datos según el término ingresado y muestra los resultados en la misma vista.
 function buscarU(req, res) {
     const searchTerm = req.body.searchTerm;
 
@@ -35,6 +39,8 @@ function buscarU(req, res) {
     });
 }
 
+// Función para obtener datos de un usuario específico y los roles disponibles
+// Busca un usuario por su ID y muestra un formulario para editarlo, incluyendo los roles en un combo box.
 function editarU(req, res) {
     const id_U = req.params.id_U;
     req.getConnection((err, conn) => {
@@ -66,6 +72,8 @@ function editarU(req, res) {
     });
 }
 
+// Función para actualizar los datos de un usuario
+// Verifica si la contraseña fue modificada; si es así, la encripta antes de actualizar los datos en la base de datos.
 function actualizarU(req, res) {
     const id_U = req.params.id_U;
     const data = req.body;
@@ -120,6 +128,8 @@ function actualizarU(req, res) {
     });
 }
 
+// Función para eliminar un usuario
+// Elimina un usuario de la base de datos utilizando su ID y redirige a la vista de usuarios.
 function eliminarU(req, res) {
     const id_U = req.body.id_U;
     req.getConnection((err, conn) => {

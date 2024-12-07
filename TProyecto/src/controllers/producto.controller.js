@@ -1,4 +1,5 @@
 function verProducto(req, res) {
+    // Obtiene y muestra todos los productos, incluyendo su marca y proveedor relacionados.
     req.getConnection((err, conn) => {
         const read = `
             SELECT Producto.*, Marca.Nom_Marca, Proveedor.Nom_Proveedor 
@@ -18,6 +19,7 @@ function verProducto(req, res) {
 }
 
 function buscarP(req, res) {
+    // Busca productos que coincidan con el término ingresado por el usuario.
     const searchTerm = req.body.searchTerm;
 
     req.getConnection((err, conn) => {
@@ -39,6 +41,7 @@ function buscarP(req, res) {
 }
 
 function crearP(req, res) {
+    // Prepara la vista para crear un nuevo producto, cargando las listas de marcas y proveedores.
     req.getConnection((err, conn) => {
         if (err) return res.json(err);
 
@@ -58,6 +61,7 @@ function crearP(req, res) {
 }
 
 function print(req, res) {
+    // Inserta un nuevo producto en la base de datos y redirige a la lista de productos.
     const data = req.body;
     req.getConnection((err, conn) => {
         conn.query('INSERT INTO Producto SET ?', [data], (err, rows) => {
@@ -71,6 +75,7 @@ function print(req, res) {
 }
 
 function editarP(req, res) {
+    // Carga los datos de un producto específico para editar, junto con las listas de marcas y proveedores.
     const id_P = req.params.id_P;
     req.getConnection((err, conn) => {
         const read = `SELECT * FROM Producto WHERE ID_Producto = ?`;
@@ -103,6 +108,7 @@ function editarP(req, res) {
 }
 
 function actualizar(req, res) {
+    // Actualiza los datos de un producto específico en la base de datos.
     const id_P = req.params.id_P;
     const data = req.body;
 
@@ -112,7 +118,6 @@ function actualizar(req, res) {
             return res.status(500).send('Error de conexión');
         }
 
-        // Intentar actualizar
         conn.query('UPDATE producto SET ? WHERE ID_Producto = ?', [data, id_P], (err, rows) => {
             if (err) {
                 console.error('Error al actualizar producto', err);
@@ -128,8 +133,8 @@ function actualizar(req, res) {
     });
 }
 
-
 function eliminarP(req, res) {
+    // Elimina un producto específico de la base de datos y redirige a la lista de productos.
     const id_P = req.body.id_P;
     req.getConnection((err, conn) => {
         conn.query('DELETE FROM Producto WHERE ID_Producto = ?', [id_P], (err, rows) => {

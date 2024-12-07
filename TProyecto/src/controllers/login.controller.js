@@ -1,14 +1,15 @@
 const bcrypt = require('bcrypt');
 
+// Función para mostrar la vista de inicio de sesión si el usuario no ha iniciado sesión
 function index(req, res) {
   if(req.session.loggedin != true){
-
-    res.render('login/index');
+    res.render('login/index');  // Renderiza la vista de inicio de sesión
   }else{
-    res.redirect('/');
+    res.redirect('/');  // Redirige al usuario si ya está logueado
   }
 }
 
+// Función para autenticar al usuario
 function auth(req, res) {
   const data = req.body;
   const email = data.Correo_U;
@@ -31,11 +32,11 @@ function auth(req, res) {
                   if (!isMatch) {
                       return res.render('login/index', { error: 'Contraseña incorrecta' });
                   } else {
-                      req.session.loggedin = true;
+                      req.session.loggedin = true;  // Marca al usuario como logueado
                       req.session.name = userdata.Nombre_U;
                       req.session.role = userdata.Fk_Rol;
 
-                      res.redirect('/');
+                      res.redirect('/');  // Redirige al usuario a la página principal
                   }
               });
 
@@ -46,15 +47,16 @@ function auth(req, res) {
   });
 }
 
-  function register(req, res) {
-    if(req.session.loggedin != true){
-
-      res.render('login/registro');
-    }else{
-      res.redirect('/');
-    }
+// Función para mostrar la vista de registro si el usuario no está logueado
+function register(req, res) {
+  if(req.session.loggedin != true){
+    res.render('login/registro');  // Renderiza la vista de registro
+  }else{
+    res.redirect('/');  // Redirige al usuario si ya está logueado
   }
+}
 
+// Función para almacenar un nuevo usuario en la base de datos
 function storeUser(req, res) {
   const data = req.body;
   const email = data.Correo_U;
@@ -76,11 +78,11 @@ function storeUser(req, res) {
           }
           else{
             
-          // Encriptacion de la contraseña
+          // Encriptación de la contraseña antes de guardarla
             bcrypt.hash(data.password, 12)
             .then(hash => {
-                data.Fk_Rol = 2; // Valor predeterminado del rol
-                data.password = hash; // Reemplazar la contraseña con el hash
+                data.Fk_Rol = 2; // Asigna un rol por defecto al usuario
+                data.password = hash; // Reemplaza la contraseña con el hash
 
                 req.getConnection((err, conn) => {
                     if (err) {
@@ -92,7 +94,7 @@ function storeUser(req, res) {
                             console.error('Error al insertar el usuario:', err);
                             return res.status(500).send('Error al registrar el usuario');
                         }
-                        res.redirect('/login');
+                        res.redirect('/login');  // Redirige al inicio de sesión después del registro exitoso
                     });
                 });
             })
@@ -101,24 +103,23 @@ function storeUser(req, res) {
                 res.status(500).send('Error al registrar el usuario');
             });
           }
-          
       });
   });
 }
 
-  
-  function logout(req, res) {
-    if (req.session.loggedin == true) {
-      req.session.destroy();
-    }
-    res.redirect('/login');
+// Función para cerrar sesión y redirigir al login
+function logout(req, res) {
+  if (req.session.loggedin == true) {
+    req.session.destroy();  // Destruye la sesión activa
   }
-  
-  
-  module.exports = {
-    index: index,
-    register: register,
-    auth: auth,
-    logout: logout,
-    storeUser,
-  }
+  res.redirect('/login');  // Redirige al inicio de sesión
+}
+
+// Exportación de las funciones para su uso en las rutas
+module.exports = {
+  index: index,
+  register: register,
+  auth: auth,
+  logout: logout,
+  storeUser,
+}

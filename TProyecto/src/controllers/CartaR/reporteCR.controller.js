@@ -1,6 +1,7 @@
 // report.controller.js
 const PDFDocument = require('pdfkit');
 
+// Ver todas las cartas registradas
 function verCarta(req, res) {
     req.getConnection((err, conn) => {
         if (err) {
@@ -33,7 +34,7 @@ function verCarta(req, res) {
     });
 }
 
-
+// Buscar cartas por un término específico (Resumen)
 function buscarCarta(req, res) {
     const searchTerm = req.body.searchTerm; // Obtén el término de búsqueda desde el formulario
 
@@ -44,7 +45,21 @@ function buscarCarta(req, res) {
         }
 
         // Ajustamos la consulta para buscar coincidencias parciales en el campo "Resumen"
-        const query = `SELECT * FROM carta_r WHERE Resumen LIKE ?`;
+        const query = `
+            SELECT 
+                carta_r.*,
+                producto.Nom_Producto,
+                sistemas.Nom_Software,
+                agencia.Nom_Agencia,
+                usuario.Nombre_U
+            FROM 
+                carta_r 
+            JOIN producto ON carta_r.Fk_Producto = producto.ID_Producto
+            JOIN sistemas ON carta_r.Fk_Sistema = sistemas.ID_Sistemas
+            JOIN agencia ON carta_r.Fk_Agencia = agencia.Id_Area
+            JOIN usuario ON carta_r.Fk_Usuario = usuario.ID_Usuario
+            WHERE carta_r.Resumen LIKE ?;
+        `;
 
         conn.query(query, [`%${searchTerm}%`], (err, cartas) => {
             if (err) {
@@ -59,7 +74,7 @@ function buscarCarta(req, res) {
 }
 
 
-// Nueva función: Redirigir a la vista `imprimir-carta.hbs`
+// Redirigir a la vista `imprimir-carta.hbs`
 function vistaImprimir(req, res) {
     const id_Carta = req.params.id_Carta;
 
@@ -101,7 +116,7 @@ function vistaImprimir(req, res) {
     });
 }
 
-// Modificación de la función `imprimirCarta`: Generar el PDF
+// Generar el PDF de la carta
 function imprimirCarta(req, res) {
     const id_Carta = req.params.id_Carta;
 

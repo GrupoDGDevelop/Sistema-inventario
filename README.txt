@@ -90,4 +90,6 @@ Este comando eliminará la carpeta node_modules y reinstalará todas las depende
 
 BUENA SUERTE.
 
-Attentamente:Yoshua Raymundo Moreno Arredondo 
+Este proyecto fue creado por Yoshua Raymundo Moreno Arredondo durante los periodos comprendidos del 03-Septiembre-2024 al 06-Diciembre-2024
+
+Atentamente:Yoshua Raymundo Moreno Arredondo 

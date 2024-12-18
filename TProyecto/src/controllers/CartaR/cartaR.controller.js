@@ -47,6 +47,11 @@ function crearCarta(req, res) {
 
 // Función para guardar una nueva Carta R
 function guardarCarta(req, res) {
+
+    let productos = req.body.Fk_Producto;
+    productos = productos.split(",");
+    console.log(list)
+
     const data = {
         Fk_Producto: req.body.Fk_Producto,
         Fk_Sistema: req.body.Fk_Sistema,

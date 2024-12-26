@@ -5,12 +5,16 @@
 
 <div class="mb-4">
     <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700">
+    <a href="/verProducto" class="text-gray-500 hover:text-gray-700">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
         <span class="ml-2">Regresar</span>
     </button>
 </div>
+    </a>
+</div>
+
 
 <!-- Contenedor principal para las dos columnas -->
 <div class="flex justify-start space-x-8 my-12 w-3/4">
@@ -379,6 +383,7 @@
             if (response.ok) {
                 alert("Característica agregada con éxito.");
                 document.getElementById('nuevaCaracteristicaInput').value = ""; // Limpiar el input
+                window.location.reload(); // Recargar la página
             } else {
                 alert("Error al agregar la característica.");
             }
@@ -391,6 +396,7 @@
 
     document.querySelector('form').addEventListener('submit', async (event) => {
         event.preventDefault(); // Evita recargar la página
+        //event.preventDefault(); // Evita recargar la página
 
         // Capturar los valores del formulario
         const tipoProducto = document.getElementById('tipoProducto').value;
@@ -409,6 +415,11 @@
         // Validar que los datos clave existan
         if (tipoDatoSelect && valor && nombre) {
             return { nombre, tipoDato: tipoDatoSelect, valor, opcional };
+        const name = div.previousElementSibling?.querySelector('label:nth-child(2)')?.textContent.trim() || 'Sin nombre'; // Nombre (label anterior al grupo)
+
+        // Validar que los datos clave existan
+        if (tipoDatoSelect && valor && nombre) {
+            return { name, tipo_valor: tipoDatoSelect, valor, opcional };
         }
 
         console.warn('Campo faltante en característica, omitiendo:', { tipoDatoSelect, valor, nombre, opcional });

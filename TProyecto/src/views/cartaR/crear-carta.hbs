@@ -29,6 +29,7 @@
                         <div class="equipo-item bg-gray-200 p-4 rounded-md mb-6">
                             <h2 class="font-bold text-xl mb-4">Descripción de Equipo</h2>
                             <div class="grid grid-cols-3 gap-4">
+
                                 <div>
                                     <label class="font-semibold block mb-2">Tipo</label>
                                     <select class="border border-gray-300 rounded-md w-full p-2 producto-select" name="Fk_Producto" required>
@@ -97,6 +98,48 @@
                                     <option value="" disabled selected>Seleccionar Sistema</option>
                                     {{#each sistemas}}
                                         <option value="{{ID_Sistemas}}">{{Nom_Software}}</option>
+
+
+                    </div>
+                    <div>
+                        <select id="productoSelect" class="border border-gray-300 rounded p-2">
+                            <option value="">Selecciona un producto</option>
+                            <!-- Opciones dinámicas se llenarán aquí -->
+                        </select>
+                        <button id="addProductoBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                            Agregar Producto
+                        </button>
+                    </div>
+
+                    <!-- Tabla de productos -->
+                    <table class="table-fixed w-full mt-4">
+                        <thead>
+                            <tr class="bg-gray-500 text-white">
+                                <th class="w-1/4 py-4">Tipo de producto</th>
+                                <th class="w-1/6 py-4">Modelo</th>
+                                <th class="w-1/6 py-4">Características</th>
+                                <th class="w-1/6 py-4">Precio Total (MXN)</th>
+                                <th class="w-1/6 py-4">Marca</th>
+                                <th class="w-1/6 py-4">Proveedor</th>
+                                <th class="w-28 py-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Este tbody estará vacío inicialmente y se llenará dinámicamente -->
+                        </tbody>
+                    </table>
+
+
+                    <!-- Descripción de Software -->
+                    <div class="bg-gray-200 p-4 rounded-md mb-6">
+                        <h2 class="font-bold text-xl mb-4">Descripción de Software</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="font-semibold block mb-2">Software</label>
+                                <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Sistema" id="sistemaSelect" required>
+                                    <option value="" disabled selected>Seleccionar Sistema</option>
+                                    {{#each sistemas}}
+                                        <option value="{{ID_Sistemas}}">{{Nom_Software}}</option>
                                     {{/each}}
                                 </select>
                             </div>
@@ -112,6 +155,58 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Datos de Área -->
+                    <div class="bg-gray-200 p-4 rounded-md mb-6">
+                        <h2 class="font-bold text-xl mb-4">Datos de Área</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="font-semibold block mb-2">Departamento</label>
+                                <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Agencia" id="agenciaSelect">
+                                    <option value="" disabled selected>Seleccionar Departamento</option>
+                                    {{#each agencias}}
+                                        <option value="{{Id_Area}}">{{Nom_Agencia}}</option>
+
+                                    {{/each}}
+                                </select>
+                            </div>
+
+                            <div>
+
+                                <label class="font-semibold block mb-2">Licencia</label>
+                                <input type="text" name="Licencia" id="licenciaInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Licencia">
+                            </div>
+
+                            <div>
+                                <label class="font-semibold block mb-2">Versión</label>
+                                <input type="text" name="Version" id="versionInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Versión">
+
+                                <label class="font-semibold block mb-2">Num Agencia</label>
+                                <input type="text" name="Num_Agencia" id="numAgenciaInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Número de Agencia">
+                            </div>
+                            <div>
+                                <label class="font-semibold block mb-2">Departamento</label>
+                                <input type="text" name="Departamento" id="departamentoInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Número de Agencia">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Datos del usuario -->
+                    <div class="bg-gray-200 p-4 rounded-md mb-6">
+                        <h2 class="font-bold text-xl mb-4">Datos del Usuario</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="font-semibold block mb-2">Nombre del Encargado</label>
+                                <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Usuario" id="usuarioSelect">
+                                    <option value="" disabled selected>Seleccionar Usuario</option>
+                                    {{#each usuarios}}
+                                        <option value="{{ID_Usuario}}">{{Nombre_U}}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <!-- Datos de Área -->
                     <div class="bg-gray-200 p-4 rounded-md mb-6">
@@ -164,11 +259,22 @@
                                 <textarea name="Resumen" class="border border-gray-300 rounded-md w-full p-2" placeholder="Resumen" required></textarea>
                             </div>
 
+                    <!-- Datos -->
+                    <div class="bg-gray-200 p-4 rounded-md mb-6">
+                        <h2 class="font-bold text-xl mb-4">Datos</h2>
+                        <div class="grid grid-cols-1 gap-4">
+
+                            <div>
+                                <label class="font-semibold block mb-2">Resumen</label>
+                                <textarea name="Resumen" class="border border-gray-300 rounded-md w-full p-2" placeholder="Resumen" required></textarea>
+                            </div>
+
                             <div class="flex gap-4">
                                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Guardar</button>
                             </div>
                         </div>
                     </div>
+
 
                     <!-- Campo oculto para FechaU -->
                     <input type="hidden" name="FechaU" id="FechaU" value="{{fechaActual}}">
@@ -264,6 +370,145 @@
             document.getElementById('usuarioSelect').addEventListener('change', function() {
                 cargarDatos('usuario', this.value);
             });
+                    <!-- Campo oculto para FechaU -->
+                    <input type="hidden" name="FechaU" id="FechaU" value="{{fechaActual}}">
+
+                </form>
+            </div>
+        </div>
+
+<script>
+    
+    // Obtener la fecha actual
+    document.getElementById('FechaU').value = new Date().toISOString();
+
+    // Función para manejar cambios en los select y autocompletar los campos
+    function cargarDatos(tipo, id, equipoItem) {
+        fetch(`/crearCartaR/${tipo}/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data) {
+                    switch(tipo) {
+                        case 'producto':
+                            // Seleccionar el campo de entrada del equipo dentro del bloque actual
+                            const modeloInput = equipoItem.querySelector('.modelo-input');
+                            const precioInput = equipoItem.querySelector('.precio-input');
+                            const caracteristicasTextarea = equipoItem.querySelector('.caracteristicas-textarea');
+                            const marcaSelect = equipoItem.querySelector('.marca-select');
+                            const proveedorSelect = equipoItem.querySelector('.proveedor-select');
+
+                            //Asignar el valor obtenido de los datos o dejarlo vacío si no existe
+                            modeloInput.value = data.modelo || '';
+                            precioInput.value = data.precio_total || '';
+                            caracteristicasTextarea.value = data.caracteristicas || '';
+
+                            // Actualizar opciones de Marca y Proveedor
+                            marcaSelect.innerHTML = `<option value="${data.marca_id}" selected>${data.marca}</option>`;
+                            proveedorSelect.innerHTML = `<option value="${data.proveedor_id}" selected>${data.proveedor}</option>`;
+                            break;
+                        case 'sistema':
+                            // Actualizar opciones de licencia y proveedor
+                            document.getElementById('licenciaInput').value = data.licencia || '';
+                            document.getElementById('versionInput').value = data.version || '';
+                            break;
+                        case 'agencia':
+                            // Actualizar opciones de agencia y departamento
+                            document.getElementById('numAgenciaInput').value = data.num_agencia || '';
+                            document.getElementById('departamentoInput').value = data.departamento || '';
+                            break;
+                        case 'usuario':
+                            // Actualizar información de nombre de encargado
+                            document.getElementById('ApellidoUInput').value = data.apellido || '';
+                            break;
+                    }
+                }
+            })
+            .catch(error => console.error(`Error al obtener los datos de ${tipo}:`, error));
+    }
+
+    // Función para cargar los productos en el combo box
+    async function cargarProductos() {
+        try {
+            const response = await fetch('/verProductos'); // Ruta para obtener los productos
+            const data = await response.json();
+
+            if (response.ok) {
+                const productos = data.productos;
+
+                // Obtener el combo box
+                const productoSelect = document.getElementById('productoSelect');
+
+                // Limpiar el combo box antes de llenarlo
+                productoSelect.innerHTML = '<option value="">Selecciona un producto</option>';
+
+                // Llenar el combo box con los productos
+                productos.forEach(producto => {
+                    const opcion = document.createElement('option');
+                    opcion.value = JSON.stringify(producto); // Guardar el producto completo como valor
+                    opcion.textContent = producto.Modelo;
+                    productoSelect.appendChild(opcion);
+                });
+            } else {
+                console.error('Error al cargar productos:', data.mensaje);
+            }
+        } catch (error) {
+            console.error('Error al conectar con el servidor:', error);
+        }
+    }
+
+    // Función para agregar un producto seleccionado a la tabla
+    function agregarProductoATabla() {
+        const productoSelect = document.getElementById('productoSelect');
+        const tbody = document.querySelector('tbody');
+
+        // Obtener el producto seleccionado
+        const productoSeleccionado = productoSelect.value;
+
+        if (!productoSeleccionado) {
+            alert('Por favor, selecciona un producto.');
+            return;
+        }
+
+        // Parsear el producto y crear una fila
+        const producto = JSON.parse(productoSeleccionado);
+        const fila = document.createElement('tr');
+        fila.classList.add('bg-white', 'border-b');
+
+        fila.innerHTML = `
+            <td class="p-3">${producto.Nom_Producto}</td>
+            <td class="p-3">${producto.Modelo}</td>
+            <td class="p-3">${producto.Caracteristicas}</td>
+            <td class="p-3">${producto.Precio_Total}</td>
+            <td class="p-3">${producto.Nom_Marca}</td>
+            <td class="p-3">${producto.Nom_Proveedor}</td>
+            <td class="p-3 flex justify-center">
+                <button class="bg-red-500 text-white px-3 py-1 rounded-sm" onclick="eliminarFila(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <a href="/producto/editarProducto/${producto.ID_Producto}" class="bg-green-500 text-white px-3 py-1 rounded-sm">
+                    <i class="fas fa-pen"></i>
+                </a>
+            </td>
+        `;
+
+        // Agregar la fila al cuerpo de la tabla
+        tbody.appendChild(fila);
+
+        // Reiniciar el combo box
+        productoSelect.value = '';
+    }
+
+    // Función para eliminar una fila de la tabla
+    function eliminarFila(boton) {
+            const fila = boton.closest('tr');
+            fila.remove();
+        }
+
+        // Llamar a cargarProductos cuando la página cargue
+        window.onload = cargarProductos;
+
+        // Asignar eventos
+        document.getElementById('addProductoBtn').addEventListener('click', agregarProductoATabla);
 
         </script>
     </body>

@@ -426,7 +426,7 @@ async function actualizarProducto(req, res) {
         }
 
         // Redirigir a la lista de productos
-        res.redirect('/verProductos');
+        res.redirect('producto/verProductos');
     } catch (error) {
         console.error("Error al actualizar el producto:", error);
         res.status(500).send("Error al actualizar el producto");

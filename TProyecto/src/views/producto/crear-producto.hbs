@@ -1,58 +1,458 @@
-    <div class="mb-4">
-        <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-            <span class="ml-2">Regresar</span>
-        </button>
+<!DOCTYPE html>
+<html lang="es">
+
+<body>
+
+<div class="mb-4">
+    <a href="/verProducto" class="text-gray-500 hover:text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span class="ml-2">Regresar</span>
+    </a>
+</div>
+
+
+<!-- Contenedor principal para las dos columnas -->
+<div class="flex justify-start space-x-8 my-12 w-3/4">
+
+    <!-- Columna 1: Crear Producto -->
+    <div class="block p-8 bg-white w-2/3 border border-gray-200 rounded-lg shadow-lg text-gray-800">
+        <h1 class="text-center text-3xl font-bold">Crear Producto</h1>
+
+        <form action="" method="POST" class="mt-4">
+            <!-- Selección del tipo de producto -->
+            <select 
+                id="tipoProducto" 
+                class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
+                    p-2 my-2 focus:bg-white" 
+                name="tipoProducto" 
+                required    
+            >   
+                <option value="" disabled selected>Seleccionar Tipo de Producto</option>
+                {{#each tiposProductos}}
+                    <option 
+                        value="{{tipo_producto}}" 
+                        {{#ifCond ../product.tipoProducto tipo_producto}}selected{{/ifCond}}
+                    >
+                        {{tipo_producto}}
+                    </option>
+                {{/each}}
+            </select>
+
+            <!-- Sección de características -->
+            <label class="text-lg font-semibold w-full block">Características</label>
+            <div id='labelSinCaracteristicas' class="flex justify-center my-4">
+                <label class="text-lg w-1/4 text-center">
+                    (Elija un producto para mostrar sus características)
+                </label>
+            </div>
+            <div id="caracteristicas-container">
+                <!-- Aquí se cargarán las características dinámicamente -->
+            </div>
+
+            <div class="flex justify-center">
+                <select id="caracteristicasSelect" class="hidden border border-gray-300 rounded-md bg-gray-500 text-white p-2 text-lg focus:bg-gray-500 w-1/2 min-w-[150px]">
+                    <option value="" disabled selected>Agregar característica</option>
+                </select>
+            </div>
+
+            <!-- Sección de marca -->
+            <label class="text-lg font-semibold w-full block mt-4">Marca</label>
+            <select class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
+                p-2 my-2 focus:bg-white" name="Fk_Marca" required>
+                <option value="" disabled selected>Seleccionar Marca</option>
+                {{#each marcas}}
+                    <option value="{{Id_Marca}}" {{#ifCond ../product.Fk_Marca Id_Marca}}selected{{/ifCond}}>
+                        {{Nom_Marca}}
+                    </option>
+                {{/each}}
+            </select>
+
+            <!-- Sección de proveedor -->
+            <label class="text-lg font-semibold w-full block mt-4">Proveedor</label>
+            <select class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
+                p-2 my-2 focus:bg-white" name="Fk_Proveedor" required>
+                <option value="" disabled selected>Seleccionar Proveedor</option>
+                {{#each proveedores}}
+                    <option value="{{Id_Proveedor}}" {{#ifCond ../product.Fk_Proveedor Id_Proveedor}}selected{{/ifCond}}>
+                        {{Nom_Proveedor}}
+                    </option>
+                {{/each}}
+            </select>
+
+            <!-- Sección de nota -->
+            <label class="text-lg font-semibold w-full block mt-4">Nota</label>
+            <input type="text" class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
+                p-2 my-2 focus:bg-white" placeholder="Agregue información relevante si es necesario para el producto" name="notaInput" required>
+
+            <!-- Botón de guardar -->
+            <button type="submit" class="rounded-md bg-gray-500 w-full text-lg text-white font-semibold p-2 my-3
+                hover:bg-gray-500 focus:bg-gray-700">Guardar</button>
+        </form> 
     </div>
 
-    <div class="block mx-auto my-12 p-8 bg-white w-1/3 border border-gray-200 rounded-lg shadow-lg text-gray-800">
-      <h1 class="text-center text-3xl font-bold">Crear Producto</h1>
+    <!-- Columna 2: Contenedores apara agregar nuevo tipo de producto y caracteristica -->
+    <div class="block w-1/3">
+        <!-- Primer contenedor -->
+        <div class="p-8 bg-white border border-gray-200 rounded-lg shadow-lg text-gray-800">
+            <h1 class="text-center text-3xl font-bold">Crear nueva característica</h1>
+            <input 
+                type="text" 
+                id="nuevaCaracteristicaInput" 
+                class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
+                    p-2 my-2 focus:bg-white" 
+                placeholder="Nombre de la característica" 
+                required
+            >
+            <button 
+                id="agregarCaracteristicaButton" 
+                class="rounded-md bg-gray-500 w-full text-lg text-white font-semibold p-2 my-3
+                    hover:bg-gray-500 focus:bg-gray-700"
+            >
+                Agregar
+            </button>
+        </div>
 
-      <form action="" method="POST" class="mt-4">
-
-        <!-- Campo para Nombre -->
-        <input type="text" class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
-          p-2 my-2 focus:bg-white" placeholder="Nombre del Producto" name="Nom_Producto" required>
-
-        <!-- Campo para Modelo -->
-        <input type="text" class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
-          p-2 my-2 focus:bg-white" placeholder="Modelo" name="Modelo" required>
-
-        <!-- Campo para Características -->
-        <textarea class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
-          p-2 my-2 focus:bg-white h-20" placeholder="Características" name="Caracteristicas" required></textarea>
-
-        <!-- Campo para Precio Total -->
-        <input type="text" class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
-          p-2 my-2 focus:bg-white" placeholder="Precio Total" name="Precio_Total" required>
-
-        <!-- Combo Box para Fk_Marca -->
-        <select class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
-              p-2 my-2 focus:bg-white" name="Fk_Marca" required>
-            <option value="" disabled selected>Seleccionar Marca</option>
-            {{#each marcas}}
-                <option value="{{Id_Marca}}" {{#ifCond ../product.Fk_Marca Id_Marca}}selected{{/ifCond}}>
-                    {{Nom_Marca}}
-                </option>
-            {{/each}}
-        </select>
-
-        <!-- Combo Box para Fk_Proveedor -->
-        <select class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
-          p-2 my-2 focus:bg-white" name="Fk_Proveedor" required>
-            <option value="" disabled selected>Seleccionar Proveedor</option>
-            {{#each proveedores}}
-                <option value="{{Id_Proveedor}}" {{#ifCond ../product.Fk_Proveedor Id_Proveedor}}selected{{/ifCond}}>
-                    {{Nom_Proveedor}}
-                </option>
-            {{/each}}
-        </select>
-
-        <!-- Botón de enviar -->
-        <button type="submit" class="rounded-md bg-gray-500 w-full text-lg text-white font-semibold p-2 my-3
-          hover:bg-gray-500 focus:bg-gray-700">Guardar</button>
-
-      </form> 
+        <!-- Segundo contenedor -->
+        <div class="p-8 bg-white border border-gray-200 rounded-lg shadow-lg text-gray-800 mt-8">
+            <h1 class="text-center text-3xl font-bold">Agregar nuevo tipo de producto</h1>
+            <form id="nuevoTipoProductoForm" class="mt-4">
+                <input 
+                    type="text" 
+                    id="nuevoTipoProductoInput" 
+                    class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
+                        p-2 my-2 focus:bg-white" 
+                    placeholder="Nombre del tipo de producto" 
+                    name="tipo_producto" 
+                    required
+                >
+                <button 
+                    type="submit" 
+                    id="agregarTipoProductoButton" 
+                    class="rounded-md bg-gray-500 w-full text-lg text-white font-semibold p-2 my-3 hover:bg-gray-500 focus:bg-gray-700"
+                >
+                    Agregar
+                </button>
+            </form>
+        </div>
     </div>
+
+</div>
+
+
+<script>
+
+    // Cargar las características del producto dinámicamente desde la nueva ruta
+    document.getElementById('tipoProducto').addEventListener('change', function () {
+        
+        // Esconder el label donde dice que seleccione un producto
+        document.getElementById('labelSinCaracteristicas').classList.add('hidden');
+        //Mostrar el select para agregar caracteristicas
+        document.getElementById('caracteristicasSelect').classList.remove('hidden');
+
+        const tipoProducto = this.value;
+
+        if (tipoProducto) {
+            fetch(`/caracteristicas/${tipoProducto}`)
+                .then(response => response.json())
+                .then(caracteristicas => {
+                    const container = document.getElementById('caracteristicas-container');
+                    
+                    container.innerHTML = ''; // Limpiar el contenedor antes de agregar nuevos campos
+
+                    // Agregar características al contenedor
+                    caracteristicas.forEach((caracteristica) => {
+                        agregarCaracteristica(caracteristica, container);
+                    });
+                })
+                .catch(error => console.error('Error al obtener las características:', error));
+        }
+    });
+
+
+
+   function agregarCaracteristica(caracteristica, container) {
+    
+        const div = document.createElement('div'); 
+        div.classList.add('flex', 'items-center', 'space-x-4', 'my-4');
+
+        const divLabels = document.createElement('div');
+        divLabels.classList.add('flex', 'items-center', 'px-5', 'gap-11', 'my-4');
+
+        // Tipo de dato select
+        const tipoDatoSelect = document.createElement('select');
+        tipoDatoSelect.classList.add(
+            'border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2',
+            'text-lg', 'focus:bg-white', 'w-1/5', 'min-w-[150px]'
+        );
+        tipoDatoSelect.innerHTML = `
+            <option value="text" ${caracteristica.tipo_valor === 'text' ? 'selected' : ''}>Texto</option>
+            <option value="number" ${caracteristica.tipo_valor === 'number' ? 'selected' : ''}>Numérico</option>
+            <option value="boolean" ${caracteristica.tipo_valor === 'boolean' ? 'selected' : ''}>Sí/No</option>
+        `;
+        tipoDatoSelect.name = 'tipoDatoSelect';
+
+        // Campo de entrada dinámico (input o select)
+        let campoDinamico;
+        if (caracteristica.tipo_valor === 'boolean') {
+            campoDinamico = document.createElement('select');
+            campoDinamico.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'w-1/2');
+            campoDinamico.innerHTML = `
+                <option value="" disabled selected>Seleccione</option>
+                <option value="Sí">Sí</option>
+                <option value="No">No</option>
+            `;
+        } else {
+            campoDinamico = document.createElement('input');
+            campoDinamico.type = caracteristica.tipo_valor || 'text';
+            campoDinamico.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'focus:bg-white', 'w-1/2', 'min-w-[180px]', 'h-12');
+            campoDinamico.placeholder = `Ingrese ${caracteristica.caracteristica}`;
+        }
+
+        // Checkbox para opcional
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.classList.add('w-6', 'h-6');
+        checkbox.checked = caracteristica.opcional;
+
+        const labelCheckbox = document.createElement('label');
+        labelCheckbox.textContent = 'Opcional';
+        labelCheckbox.classList.add('ml-2', 'text-lg');
+
+        // Botón de eliminar
+        const buttonEliminar = document.createElement('button');
+        buttonEliminar.className = 'p-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 focus:bg-gray-900';
+        buttonEliminar.textContent = 'Eliminar';
+        buttonEliminar.addEventListener('click', function () {
+            div.remove();
+            divLabels.remove();
+        });
+
+        // Crear el elemento label para "Tipo de dato"
+        let labelTipoDato = document.createElement('label');
+        labelTipoDato.textContent = 'Tipo de dato';
+        divLabels.appendChild(labelTipoDato);
+
+        // Crear el elemento label para la caracteristica
+        let labelCaracteristica = document.createElement('label');
+        if (caracteristica.caracteristica) {
+            labelCaracteristica.textContent = caracteristica.caracteristica;
+        } else {
+            labelCaracteristica.textContent = caracteristica;
+        }
+        divLabels.appendChild(labelCaracteristica);
+
+
+        // Agregar elementos al div principal
+        div.appendChild(tipoDatoSelect);
+        div.appendChild(campoDinamico);
+        div.appendChild(buttonEliminar);
+        div.appendChild(checkbox);
+        div.appendChild(labelCheckbox);
+
+        // Agregar al contenedor general
+        container.appendChild(divLabels);
+        container.appendChild(div);
+
+        // Evento para cambiar dinámicamente el tipo de campo
+        tipoDatoSelect.addEventListener('change', function () {
+            const selectedType = this.value;
+
+            // Reemplazar el campo dinámico según el tipo seleccionado
+            const parentDiv = this.parentElement;
+            const currentField = parentDiv.querySelector('input, select:not([name="tipoDatoSelect"])');
+
+            if (selectedType === 'boolean') {
+                const comboBox = document.createElement('select');
+                comboBox.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'w-1/2');
+                comboBox.innerHTML = `
+                    <option value="" disabled selected>Seleccione</option>
+                    <option value="Sí">Sí</option>
+                    <option value="No">No</option>
+                `;
+                parentDiv.replaceChild(comboBox, currentField);
+            } else {
+                const inputReplacement = document.createElement('input');
+                inputReplacement.type = selectedType;
+                inputReplacement.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'focus:bg-white', 'w-1/2', 'min-w-[180px]', 'h-12');
+                inputReplacement.placeholder = `Ingrese un valor`;
+                parentDiv.replaceChild(inputReplacement, currentField);
+            }
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const selectElement = document.getElementById('caracteristicasSelect');
+        const container = document.getElementById('caracteristicas-container');
+
+        // Cargar las opciones del select desde el servidor una sola vez cuando la página se carga
+        try {
+            const response = await fetch('/caracteristicas'); // Ajusta la ruta según tu configuración
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+
+            if (Array.isArray(data)) {
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.caracteristica;
+                    option.textContent = item.caracteristica;
+                    selectElement.appendChild(option);
+                });
+            } else {
+                throw new Error('El formato de los datos no es válido.');
+            }
+        } catch (error) {
+            // Muestra el error en el div
+            console.error('Error al llenar el select:', error);
+        }
+
+        // Evento para agregar una nueva característica al seleccionar una opción
+        selectElement.addEventListener('change', (event) => {
+            const selectedCaracteristica = event.target.value;
+            console.log(selectedCaracteristica)
+
+            // Verificar que se haya seleccionado una opción válida
+            if (selectedCaracteristica) {
+                // Llamar a la función para agregar la característica seleccionada
+                agregarCaracteristica(selectedCaracteristica, container);
+            }
+        });
+    });
+
+
+    // Evento para el segundo contenedor (Agregar nuevo tipo de producto)
+    document.getElementById('nuevoTipoProductoForm').addEventListener('submit', async function(event) {
+
+        const tipoProducto = document.getElementById('nuevoTipoProductoInput').value.trim();
+        if (!tipoProducto) {
+            alert("Por favor, ingresa un nombre para el tipo de producto.");
+            return;
+        }
+
+        try {
+            const response = await fetch('/nuevoTipoProducto', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tipoProducto })
+            });
+
+            if (response.ok) {
+                alert("Tipo de producto agregado con éxito.");
+                document.getElementById('nuevoTipoProductoInput').value = ""; // Limpiar el input
+            } else {
+                alert("Error al agregar el tipo de producto.");
+            }
+        } catch (error) {
+            console.error("Error en la solicitud:", error);
+            alert("Ocurrió un error al agregar el tipo de producto.");
+        }
+    });
+
+
+    // Evento para el primer contenedor (Crear nueva característica)
+    document.getElementById('agregarCaracteristicaButton').addEventListener('click', async function(event) {
+
+        const nombreCaracteristica = document.getElementById('nuevaCaracteristicaInput').value.trim();
+        if (!nombreCaracteristica) {
+            alert("Por favor, ingresa un nombre para la característica.");
+            return;
+        }
+
+        try {
+            const response = await fetch('/nuevaCaracteristica', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nombreCaracteristica,
+                    tipoValor: "text",
+                    numCaracteresMin: 0,
+                    numCaracteresMax: 100,
+                    opcional: false
+                })
+            });
+
+            if (response.ok) {
+                alert("Característica agregada con éxito.");
+                document.getElementById('nuevaCaracteristicaInput').value = ""; // Limpiar el input
+                window.location.reload(); // Recargar la página
+            } else {
+                alert("Error al agregar la característica.");
+            }
+        } catch (error) {
+            console.error("Error en la solicitud:", error);
+            alert("Ocurrió un error al agregar la característica.");
+        }
+    });
+
+
+    document.querySelector('form').addEventListener('submit', async (event) => {
+        //event.preventDefault(); // Evita recargar la página
+
+        // Capturar los valores del formulario
+        const tipoProducto = document.getElementById('tipoProducto').value;
+        const Fk_Marca = document.querySelector('[name="Fk_Marca"] option:checked').textContent.trim(); // Capturar el texto de la opción seleccionada
+        const Fk_Proveedor = document.querySelector('[name="Fk_Proveedor"] option:checked').textContent.trim(); // Capturar el texto de la opción seleccionada
+        const nota = document.querySelector('[name="notaInput"]').value;
+
+    // Construir el array de características desde los campos dinámicos
+    const caracteristicas = Array.from(document.querySelectorAll('#caracteristicas-container .flex.items-center.space-x-4')).map(div => {
+        // Seleccionar los elementos específicos dentro de cada `div`
+        const tipoDatoSelect = div.querySelector('[name="tipoDatoSelect"]')?.value || null; // Tipo de dato (select)
+        const valor = div.querySelector('input[type="text"], input[type="number"]')?.value || null; // Valor (input de texto o número)
+        const opcional = div.querySelector('input[type="checkbox"]')?.checked || false; // Opcional (checkbox)
+        const name = div.previousElementSibling?.querySelector('label:nth-child(2)')?.textContent.trim() || 'Sin nombre'; // Nombre (label anterior al grupo)
+
+        // Validar que los datos clave existan
+        if (tipoDatoSelect && valor && nombre) {
+            return { name, tipo_valor: tipoDatoSelect, valor, opcional };
+        }
+
+        console.warn('Campo faltante en característica, omitiendo:', { tipoDatoSelect, valor, nombre, opcional });
+        return null; // Ignorar si falta información clave
+    }).filter(c => c !== null); // Filtrar características inválidas
+
+    console.log(caracteristicas);
+
+
+        // Crear el objeto a enviar
+        const producto = {
+            tipoProducto,
+            caracteristicas,
+            Fk_Marca, // Aquí va "DELL" o el valor seleccionado
+            Fk_Proveedor, // Aquí va el nombre del proveedor
+            nota,
+        };
+
+        try {
+            // Hacer el POST al backend
+            const response = await fetch('/nuevoProducto', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(producto),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                alert('Producto creado exitosamente');
+                console.log(data);
+            } else {
+                alert('Error al crear el producto');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al enviar los datos');
+        }
+    });
+
+
+
+    </script>
+
+</body>
+</html>

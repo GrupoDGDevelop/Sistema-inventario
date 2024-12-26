@@ -3,6 +3,7 @@ const morgan = require('morgan');
 const config = require('./config'); // Importa la configuración de la app y MySQL
 const myconnection = require('express-myconnection'); // Importa correctamente myconnection
 const mysql = require('mysql'); // Importa el cliente de MySQL
+const mongoose = require('mongoose'); // Para mongodb
 const session = require('express-session');
 const { engine } = require('express-handlebars');
 const bodyParser = require('body-parser');
@@ -51,12 +52,19 @@ app.use(express.urlencoded({ extended: true })); // Middleware para parsear dato
 app.use(session({ secret: 'mysecret', resave: true, saveUninitialized: true })); // Configuración de sesión
 app.use(bodyParser.json());
 
+
 // ** Nuevo: Configuración para servir archivos estáticos **
 const path = require('path');
 app.use(express.static(path.join(__dirname, 'public'))); // Exponer la carpeta public como estática
 
 // Conexión a la base de datos MySQL usando los parámetros de configuración
 app.use(myconnection(mysql, config.mysql, 'single')); // Asegúrate de que myconnection se use correctamente
+
+// ** Conexión a MongoDB **
+mongoose.connect(config.mongo.uri, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('Conectado a MongoDB'))
+    .catch(err => console.error('Error conectando a MongoDB:', err));
+
 
 // ** Middleware para verificar autenticación **
 function isAuthenticated(req, res, next) {

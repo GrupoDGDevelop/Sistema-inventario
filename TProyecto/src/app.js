@@ -7,6 +7,8 @@ const mongoose = require('mongoose'); // Para mongodb
 const session = require('express-session');
 const { engine } = require('express-handlebars');
 const bodyParser = require('body-parser');
+//const favicon = require('serve-favicon');
+const path = require('path');
 
 // Importar rutas y manejo de errores
 const loginRutas = require('./rutas/login.rutas');
@@ -51,10 +53,10 @@ app.use(express.json()); // Middleware para parsear JSON en las peticiones
 app.use(express.urlencoded({ extended: true })); // Middleware para parsear datos de formularios
 app.use(session({ secret: 'mysecret', resave: true, saveUninitialized: true })); // Configuración de sesión
 app.use(bodyParser.json());
+//app.use(favicon(path.join(__dirname, 'public/imagenes', 'favicon-32x32.png'))); // Middleware para el favicon
 
 
 // ** Nuevo: Configuración para servir archivos estáticos **
-const path = require('path');
 app.use(express.static(path.join(__dirname, 'public'))); // Exponer la carpeta public como estática
 
 // Conexión a la base de datos MySQL usando los parámetros de configuración
@@ -93,34 +95,29 @@ app.use('/', isAuthenticated, proovedorRutas);
 
 app.get('/', isAuthenticated, async (req, res) => {
     try {
-        // Realiza la consulta a la base de datos utilizando `req.getConnection()`
-        req.getConnection(async (err, connection) => {
-            if (err) {
-                console.error('Error al obtener conexión de la base de datos:', err);
-                return res.status(500).send('Error al obtener la conexión');
-            }
+        // Conectar a la colección 'cartas_responsivas'
+        const db = mongoose.connection;
+        const collection = db.collection('cartas_responsivas');
 
-            // Consulta para obtener las primeras 8 cartas ordenadas por fecha
-            connection.query(`
-                SELECT ID_Carta_R, DATE_FORMAT(FechaU, '%d-%m-%Y') AS FechaU
-                FROM carta_r
-                ORDER BY FechaU DESC
-                LIMIT 8
-            `, (error, results) => {
-                if (error) {
-                    console.error('Error al obtener las cartas:', error);
-                    return res.status(500).send('Error al obtener las cartas');
-                }
+        // Consulta para obtener las primeras 8 cartas, ordenadas por FechaU de forma descendente
+        const cartas = await collection.find({})
+            .sort({ FechaU: -1 }) // Ordenar por fecha descendente
+            .limit(8) // Limitar a 8 resultados
+            .toArray(); // Convertir los resultados a un array
 
-                // Renderiza la vista 'home' pasando los datos de las cartas y el nombre del usuario
-                res.render('home', {
-                    title: 'Inicio',
-                    name: req.session.name, // Nombre del usuario desde la sesión
-                    cartas: results // Lista de cartas obtenida desde la base de datos
-                });
-            });
+        // Mapea los resultados para formatear la fecha
+        const cartasFormateadas = cartas.map(carta => ({
+            id_CartaR: carta.id_CartaR, // ID de la carta
+            _id : carta._id, // ID  de la carta en la base de datos
+            FechaU: new Date(carta.FechaU).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }) // Formatear la fecha
+        }));
+
+        // Renderizar la vista 'home', pasando las cartas formateadas y el nombre del usuario
+        res.render('home', {
+            title: 'Inicio',
+            name: req.session.name, // Nombre del usuario desde la sesión
+            cartas: cartasFormateadas // Lista de cartas obtenida desde la base de datos
         });
-
     } catch (error) {
         console.error('Error al obtener las cartas:', error);
         res.status(500).send('Error interno del servidor');

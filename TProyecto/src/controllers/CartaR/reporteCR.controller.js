@@ -1,38 +1,28 @@
 // report.controller.js
 const PDFDocument = require('pdfkit');
+const mongoose = require('mongoose');
 
 // Ver todas las cartas registradas
 function verCarta(req, res) {
-    req.getConnection((err, conn) => {
-        if (err) {
-            console.error('Error al establecer la conexión:', err);
-            return res.status(500).json(err);
-        }
+    const db = mongoose.connection; // Obtener la conexión de mongoose
+    const collection = db.collection('cartas_responsivas'); // Acceder a la colección 'cartas_responsivas'
 
-        const query = `
-            SELECT 
-                carta_r.*,
-                producto.Nom_Producto,
-                sistemas.Nom_Software,
-                agencia.Nom_Agencia,
-                usuario.Nombre_U
-            FROM 
-                carta_r JOIN producto ON carta_r.Fk_Producto = producto.ID_Producto
-            JOIN sistemas ON carta_r.Fk_Sistema = sistemas.ID_Sistemas
-            JOIN agencia ON carta_r.Fk_Agencia = agencia.Id_Area
-            JOIN usuario ON carta_r.Fk_Usuario = usuario.ID_Usuario;
-        `;
-
-        conn.query(query, (err, cartas) => {
-            if (err) {
-                console.error('Error al ejecutar la consulta:', err);
-                return res.json(err);
+    collection.find({}).toArray()
+        .then(cartas => {
+            if (!cartas) {
+                return res.status(404).json({ message: 'No se encontraron cartas responsivas.' });
             }
 
+            // Renderizar la vista y pasar las cartas
             res.render('cartaR/ver-carta', { cartas });
+            
+        })
+        .catch(err => {
+            console.error('Error al obtener cartas responsivas:', err);
+            res.status(500).json({ message: 'Error al obtener cartas responsivas', error: err });
         });
-    });
 }
+
 
 // Buscar cartas por un término específico (Resumen)
 function buscarCarta(req, res) {
@@ -74,126 +64,108 @@ function buscarCarta(req, res) {
 }
 
 
-// Redirigir a la vista `imprimir-carta.hbs`
-function vistaImprimir(req, res) {
-    const id_Carta = req.params.id_Carta;
+// Redirigir a la vista `imprimir-carta.hbs` utilizando MongoDB
+async function vistaImprimir(req, res) {
+    const id_Carta = req.params.id_Carta; // Obtener el ID de la carta desde los parámetros
+    console.log(id_Carta);
 
-    req.getConnection((err, conn) => {
-        if (err) return res.status(500).send("Error en la conexión a la base de datos");
+    try {
+        const db = mongoose.connection; // Obtener la conexión de mongoose
+        const collection = db.collection('cartas_responsivas'); // Acceder a la colección 'cartas_responsivas'
 
-        // Consulta para unir todas las tablas relacionadas con `carta_r`
-        const query = `
-            SELECT 
-                cr.*,
-                u.ID_Usuario, u.Nombre_U, u.Correo_U,
-                a.Id_Area, a.Nom_Agencia, a.Num_Agencia, a.Departamento,
-                s.ID_Sistemas, s.Nom_Software, s.Version, s.Licencia,
-                p.ID_Producto, p.Nom_Producto, p.Modelo, p.Caracteristicas, p.Precio_Total,
-                m.Id_Marca, m.Nom_Marca,
-                pr.Id_Proveedor, pr.Nom_Proveedor
-            FROM 
-                carta_r cr
-            LEFT JOIN usuario u ON cr.Fk_Usuario = u.ID_Usuario
-            LEFT JOIN agencia a ON cr.Fk_Agencia = a.Id_Area
-            LEFT JOIN sistemas s ON cr.Fk_Sistema = s.ID_Sistemas
-            LEFT JOIN producto p ON cr.Fk_Producto = p.ID_Producto
-            LEFT JOIN marca m ON p.Fk_Marca = m.Id_Marca
-            LEFT JOIN proveedor pr ON p.Fk_Proveedor = pr.Id_Proveedor
-            WHERE cr.ID_Carta_R = ?;
-        `;
+        // Buscar la carta en la base de datos usando id_CartaR
+        const carta = await collection.findOne({ id_CartaR: id_Carta });
+        console.log(carta);
 
-        conn.query(query, [id_Carta], (err, result) => {
-            if (err) return res.status(500).send("Error al obtener datos de la Carta R");
-            if (result.length === 0) return res.status(404).send("Carta R no encontrada");
+        if (!carta) {
+            return res.status(404).send("Carta R no encontrada");
+        }
 
-            // Renderizamos la vista pasando los datos de la carta y tablas relacionadas
-            res.render('cartaR/imprimir-carta', { 
-                carta: result[0], 
-                datos: result, 
-                noLayout: true  // Pasar la variable noLayout para omitir la barra lateral y superior
-            });
+        // Renderizar la vista pasando los datos de la carta
+        res.render('cartaR/imprimir-carta', { 
+            carta,   // Pasamos la carta directamente a la vista
+            noLayout: true  // Omitir la barra lateral y superior
         });
-    });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send("Error al obtener datos de la Carta R");
+    }
 }
 
 // Generar el PDF de la carta
 function imprimirCarta(req, res) {
     const id_Carta = req.params.id_Carta;
 
-    req.getConnection((err, conn) => {
+    // Obtener la conexión de mongoose y acceder a la colección 'cartas_responsivas'
+    const db = mongoose.connection;
+    const collection = db.collection('cartas_responsivas');
+
+    // Buscar la carta en la colección por su _id
+    collection.findOne({ _id: new mongoose.Types.ObjectId(id_Carta) }, (err, carta) => {
         if (err) return res.status(500).send("Error en la conexión a la base de datos");
+        if (!carta) return res.status(404).send("Carta no encontrada");
+        
+        // Configuración del PDF
+        const doc = new PDFDocument();
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="Carta_R_${id_Carta}.pdf"`);
 
-        // Misma consulta SQL que en `vistaImprimir`
-        const query = `
-            SELECT 
-                cr.*,
-                u.Nombre_U, u.Apellido_U, u.Correo_U,
-                a.Nom_Agencia, a.Num_Agencia, a.Departamento,
-                s.Nom_Software, s.Version, s.Licencia,
-                p.Nom_Producto, p.Modelo, p.Caracteristicas, p.Precio_Total,
-                m.Nom_Marca,
-                pr.Nom_Proveedor
-            FROM 
-                carta_r cr
-            LEFT JOIN usuario u ON cr.Fk_Usuario = u.ID_Usuario
-            LEFT JOIN agencia a ON cr.Fk_Agencia = a.Id_Area
-            LEFT JOIN sistemas s ON cr.Fk_Sistema = s.ID_Sistemas
-            LEFT JOIN producto p ON cr.Fk_Producto = p.ID_Producto
-            LEFT JOIN marca m ON p.Fk_Marca = m.Id_Marca
-            LEFT JOIN proveedor pr ON p.Fk_Proveedor = pr.Id_Proveedor
-            WHERE cr.ID_Carta_R = ?;
-        `;
+        doc.pipe(res);
 
-        conn.query(query, [id_Carta], (err, result) => {
-            if (err) return res.status(500).send("Error al obtener datos de la Carta R");
-            if (result.length === 0) return res.status(404).send("Carta R no encontrada");
+        // Encabezado
+        doc.fontSize(14).text(`Carta R - ${id_Carta}`, { align: 'center' });
+        doc.moveDown();
 
-            const carta = result[0];
+        // Sección: Datos del área
+        const agencia = carta.Fk_Agencia || {};
+        doc.fontSize(10).text('Datos del Área', { underline: true });
+        doc.fontSize(10).text(`Agencia: ${agencia.Nombre || 'No especificada'}`);
+        doc.text(`Número de Agencia: ${agencia.Num_Agencia || 'No especificado'}`);
+        doc.text(`Departamento: ${agencia.Departamento || 'No especificado'}`);
+        doc.moveDown();
 
-            // Configuración del PDF
-            const doc = new PDFDocument();
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="Carta_R_${id_Carta}.pdf"`);
-
-            doc.pipe(res);
-
-            // Encabezado
-            doc.fontSize(18).text(`Carta R - ${carta.ID_Carta_R}`, { align: 'center' });
+        // Sección: Descripción del equipo
+        doc.fontSize(10).text('Descripción del Equipo', { underline: true });
+        carta.Fk_Producto.forEach((producto, index) => {
+            doc.fontSize(10).text(`Producto ${index + 1}: ${producto.Nom_Producto || 'No especificado'}`);
+            doc.text(`Marca: ${producto.Nom_Marca || 'No especificada'}`);
+            doc.text(`Modelo: ${producto.Modelo || 'No especificado'}`);
+            // Separar características en líneas diferentes
+            const caracteristicas = producto.Caracteristicas ? producto.Caracteristicas.split(', ') : ['No especificadas'];
+            caracteristicas.forEach(caracteristica => {
+                doc.text(`${caracteristica}`);
+            });
+            doc.text(`Precio Total: ${producto.Precio_Total || 'No especificado'}`);
             doc.moveDown();
-
-            // Sección: Datos del área
-            doc.fontSize(14).text('Datos del Área', { underline: true });
-            doc.fontSize(12).text(`Agencia: ${carta.Nom_Agencia || 'No especificada'}`);
-            doc.text(`Número de Agencia: ${carta.Num_Agencia || 'No especificado'}`);
-            doc.text(`Departamento: ${carta.Departamento || 'No especificado'}`);
-            doc.moveDown();
-
-            // Sección: Descripción del equipo
-            doc.fontSize(14).text('Descripción del Equipo', { underline: true });
-            doc.fontSize(12).text(`Producto: ${carta.Nom_Producto || 'No especificado'}`);
-            doc.text(`Marca: ${carta.Nom_Marca || 'No especificada'}`);
-            doc.text(`Modelo: ${carta.Modelo || 'No especificado'}`);
-            doc.text(`Características: ${carta.Caracteristicas || 'No especificadas'}`);
-            doc.text(`Precio Total: ${carta.Precio_Total || 'No especificado'}`);
-            doc.moveDown();
-
-            // Sección: Descripción del software
-            doc.fontSize(14).text('Descripción del Software', { underline: true });
-            doc.fontSize(12).text(`Software: ${carta.Nom_Software || 'No especificado'}`);
-            doc.text(`Versión: ${carta.Version || 'No especificada'}`);
-            doc.text(`Licencia: ${carta.Licencia || 'No especificada'}`);
-            doc.moveDown();
-
-            // Sección: Resumen
-            doc.fontSize(14).text('Resumen', { underline: true });
-            doc.fontSize(12).text(carta.Resumen || 'No especificado');
-            doc.moveDown();
-
-            // Finalizar el PDF
-            doc.end();
         });
+
+        // Sección: Descripción del software
+        const sistema = carta.Fk_Sistema || {};
+        doc.fontSize(10).text('Descripción del Software', { underline: true });
+        doc.fontSize(10).text(`Software: ${sistema.Nombre || 'No especificado'}`);
+        doc.text(`Versión: ${sistema.Version || 'No especificada'}`);
+        doc.text(`Licencia: ${sistema.Licencia || 'No especificada'}`);
+        doc.moveDown();
+
+        // Sección: Resumen
+        doc.fontSize(10).text('Resumen', { underline: true });
+        doc.fontSize(10).text(carta.Resumen || 'No especificado');
+        doc.moveDown();
+
+        // Sección: Información adicional (Fecha y Usuario)
+        const fecha = carta.FechaU ? new Date(carta.FechaU.$date).toLocaleString() : 'No especificada';
+        doc.fontSize(10).text('Información Adicional', { underline: true });
+        doc.fontSize(10).text(`Fecha de Última Actualización: ${fecha}`);
+        doc.text(`Responsable: ${carta.Fk_Usuario || 'No especificado'}`);
+        doc.moveDown();
+
+        // Finalizar el PDF
+        doc.end();
     });
 }
+
+
 
 module.exports = {
     verCarta: verCarta,

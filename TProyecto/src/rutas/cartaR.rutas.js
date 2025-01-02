@@ -8,7 +8,7 @@ router.get('/verCartaR', ReporteController.verCarta);
 router.post('/verCartaR', ReporteController.buscarCarta);
 
 router.get('/imprimirCartaPDF/:id_Carta', ReporteController.vistaImprimir);
-router.get('/descargarCartaPDF/:id_Carta', ReporteController.imprimirCarta);
+//router.get('/descargarCartaPDF/:id_Carta', ReporteController.imprimirCarta);
 
 router.get('/crearCartaR', CartaController.crearCarta);
 router.post('/crearCartaR', CartaController.guardarCarta);

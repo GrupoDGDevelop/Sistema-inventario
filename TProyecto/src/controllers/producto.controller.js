@@ -130,22 +130,22 @@ async function agregarTipoProducto(req, res) {
     const tipoProducto = req.body.tipoProducto; // Recibe la cadena para el tipo de producto
     const caracteristicas = [
         {
-            "caracteristica": "Modelo",
-            "tipo_valor": "text",
+            "nombre": "Modelo",
+            "tipoDato": "text",
             "num_caracteres_min": 0,
             "num_caracteres_max": 40,
             "opcional": false
         },
         {
-            "caracteristica": "Serie",
-            "tipo_valor": "text",
+            "nombre": "Serie",
+            "tipoDato": "text",
             "num_caracteres_min": 0,
             "num_caracteres_max": 40,
             "opcional": false
         },
         {
-            "caracteristica": "Precio",
-            "tipo_valor": "number",
+            "nombre": "Precio (MXN)",
+            "tipoDato": "number",
             "num_caracteres_min": 0,
             "num_caracteres_max": 40,
             "opcional": false
@@ -255,7 +255,7 @@ async function agregarProducto(req, res) {
                 // Si no existe, agregarla a `tipos_productos`
                 caracteristicasFaltantes.push({
                     caracteristica: caracteristicaProducto.nombre,
-                    tipo_valor: caracteristicaProducto.tipoDato,
+                    tipoDato: caracteristicaProducto.tipoDato,
                     num_caracteres_min: caracteristicaProducto.num_caracteres_min || 0,
                     num_caracteres_max: caracteristicaProducto.num_caracteres_max || 255,
                     opcional: caracteristicaProducto.opcional || false
@@ -270,7 +270,7 @@ async function agregarProducto(req, res) {
                 { $push: { caracteristicas: { $each: caracteristicasFaltantes } } }
             );
         }
-
+1
         // Crear el objeto del nuevo producto con características validadas
         const nuevoProducto = {
             tipoProducto,
@@ -421,17 +421,19 @@ async function actualizarProducto(req, res) {
 
         if (result.modifiedCount === 1) {
             console.log(`Producto con ID ${id_P} actualizado exitosamente`);
+            // Enviar una respuesta JSON al frontend
+            res.status(200).json({ message: 'Producto actualizado exitosamente' });
         } else {
             console.log(`Producto con ID ${id_P} no encontrado o no se pudo actualizar`);
+            res.status(404).json({ message: 'Producto no encontrado o no actualizado' });
         }
-
-        // Redirigir a la lista de productos
-        res.redirect('producto/verProductos');
     } catch (error) {
         console.error("Error al actualizar el producto:", error);
-        res.status(500).send("Error al actualizar el producto");
+        // Enviar una respuesta de error en formato JSON
+        res.status(500).json({ message: 'Error al actualizar el producto' });
     }
 }
+
 
 
 function print(req, res) {

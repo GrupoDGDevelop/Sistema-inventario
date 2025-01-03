@@ -20,20 +20,19 @@
             <!-- Selección del tipo de producto -->
             <select 
                 id="tipoProducto" 
-                class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
-                    p-2 my-2 focus:bg-white" 
+                class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 p-2 my-2 focus:bg-white" 
                 name="tipoProducto" 
                 required 
-                value="{{product.Nom_Producto}}"
             >   
                 <option value="" disabled selected>Seleccionar Tipo de Producto</option>
                 {{#each tiposProductos}}
-                    <option 
-                        value="{{tipo_producto}}" 
-                        {{#ifCond ../product.Nom_Producto tipo_producto}}selected{{/ifCond}}
-                    >
-                        {{tipo_producto}}
-                    </option>
+                <option 
+                    value="{{tipo_producto}}" 
+                    {{#ifCond ../product.Nom_Producto tipo_producto}}selected{{/ifCond}}
+                >
+                    {{tipo_producto}}
+                </option>
+
                 {{/each}}
             </select>
 
@@ -66,7 +65,7 @@
                     </option>
                 {{/each}}
             </select>
-
+            
             <!-- Sección de proveedor -->
             <label class="text-lg font-semibold w-full block mt-4">Proveedor</label>
             <select 
@@ -367,9 +366,37 @@
     });
 
 
+    async function actualizarSelectCaracteristicas() {
+        const selectElement = document.getElementById('caracteristicasSelect');
+
+        try {
+            const response = await fetch('/caracteristicas');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+
+            if (Array.isArray(data)) {
+                // Limpiar las opciones existentes
+                selectElement.innerHTML = '<option value="">Agregar característica</option>';
+
+                // Agregar las nuevas opciones
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.caracteristica;
+                    option.textContent = item.caracteristica;
+                    selectElement.appendChild(option);
+                });
+            } else {
+                throw new Error('El formato de los datos no es válido.');
+            }
+        } catch (error) {
+            console.error('Error al actualizar el select:', error);
+        }
+    }
+
+
     // Evento para el primer contenedor (Crear nueva característica)
     document.getElementById('agregarCaracteristicaButton').addEventListener('click', async function(event) {
-        event.preventDefault(); // Evita recargar la página
 
         const nombreCaracteristica = document.getElementById('nuevaCaracteristicaInput').value.trim();
         if (!nombreCaracteristica) {
@@ -393,6 +420,8 @@
             if (response.ok) {
                 alert("Característica agregada con éxito.");
                 document.getElementById('nuevaCaracteristicaInput').value = ""; // Limpiar el input
+                //window.location.reload(); // Recargar la página
+                actualizarSelectCaracteristicas();
             } else {
                 alert("Error al agregar la característica.");
             }
@@ -403,72 +432,74 @@
     });
 
 
-document.querySelector('form').addEventListener('submit', async (event) => {
-    event.preventDefault(); // Evita recargar la página
 
-    // Capturar los valores del formulario
-    const tipoProducto = document.getElementById('tipoProducto').value;
-    const Fk_Marca = document.querySelector('[name="Fk_Marca"] option:checked').textContent.trim();
-    const Fk_Proveedor = document.querySelector('[name="Fk_Proveedor"] option:checked').textContent.trim();
-    const nota = document.querySelector('[name="notaInput"]').value;
+    document.querySelector('form').addEventListener('submit', async (event) => {
+        event.preventDefault(); // Evita recargar la página
 
-    // Construir el array de características desde los campos dinámicos
-    const caracteristicas = Array.from(document.querySelectorAll('#caracteristicas-container .flex.items-center.space-x-4')).map(div => {
-        const tipoDatoSelect = div.querySelector('[name="tipoDatoSelect"]')?.value || null;
-        const valor = div.querySelector('input[type="text"], input[type="number"]')?.value || null;
-        const opcional = div.querySelector('input[type="checkbox"]')?.checked || false;
-        const nombre = div.previousElementSibling?.querySelector('label:nth-child(2)')?.textContent.trim() || 'Sin nombre';
+        // Capturar los valores del formulario
+        const tipoProducto = document.getElementById('tipoProducto').value;
+        const Fk_Marca = document.querySelector('[name="Fk_Marca"] option:checked').textContent.trim();
+        const Fk_Proveedor = document.querySelector('[name="Fk_Proveedor"] option:checked').textContent.trim();
+        const nota = document.querySelector('[name="notaInput"]').value;
 
-        if (tipoDatoSelect && valor && nombre) {
-            return { nombre, tipoDato: tipoDatoSelect, valor, opcional };
+        // Construir el array de características desde los campos dinámicos
+        const caracteristicas = Array.from(document.querySelectorAll('#caracteristicas-container .flex.items-center.space-x-4')).map(div => {
+            const tipoDatoSelect = div.querySelector('[name="tipoDatoSelect"]')?.value || null;
+            const valor = div.querySelector('input[type="text"], input[type="number"]')?.value || null;
+            const opcional = div.querySelector('input[type="checkbox"]')?.checked || false;
+            const nombre = div.previousElementSibling?.querySelector('label:nth-child(2)')?.textContent.trim() || 'Sin nombre';
+
+            if (tipoDatoSelect && valor && nombre) {
+                return { nombre, tipoDato: tipoDatoSelect, valor, opcional };
+            }
+
+            console.warn('Campo faltante en característica, omitiendo:', { tipoDatoSelect, valor, nombre, opcional });
+            return null;
+        }).filter(c => c !== null);
+
+        console.log(caracteristicas);
+
+        // Crear el objeto a enviar
+        const producto = {
+            tipoProducto,
+            caracteristicas,
+            Fk_Marca,
+            Fk_Proveedor,
+            nota,
+        };
+
+        try {
+            // Obtener el ID de la URL (último valor del pathname)
+            const urlParts = window.location.pathname.split('/');
+            const productId = urlParts[urlParts.length - 1];
+
+            console.log('Enviando:', productId);
+
+            // Incluir el ID del producto en el objeto a enviar
+            producto.id_P = productId;
+
+            // Hacer el POST al backend
+            const response = await fetch(`/producto/editarProducto/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(producto),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                alert(data.message);
+                window.location.href = '/verProducto'; // Redirigir después de mostrar el alert
+            } else {
+                alert('Error al Actualizar el producto');
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al enviar los datos');
         }
-
-        console.warn('Campo faltante en característica, omitiendo:', { tipoDatoSelect, valor, nombre, opcional });
-        return null;
-    }).filter(c => c !== null);
-
-    console.log(caracteristicas);
-
-    // Crear el objeto a enviar
-    const producto = {
-        tipoProducto,
-        caracteristicas,
-        Fk_Marca,
-        Fk_Proveedor,
-        nota,
-    };
-
-    try {
-        // Obtener el ID de la URL (último valor del pathname)
-        const urlParts = window.location.pathname.split('/');
-        const productId = urlParts[urlParts.length - 1];
-
-        console.log('Enviando:', productId);
-
-        // Incluir el ID del producto en el objeto a enviar
-        producto.id_P = productId;
-
-        // Hacer el POST al backend
-        const response = await fetch(`/producto/editarProducto/${productId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(producto),
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            alert('Producto Actualizado exitosamente');
-            console.log(data);
-        } else {
-            alert('Error al Actualizar el producto');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al enviar los datos');
-    }
-});
+    });
 
 
             // Ejecutar cuando cargue la página

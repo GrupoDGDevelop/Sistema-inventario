@@ -11,68 +11,61 @@
   </head>
 
   <body class="bg-gray-200">
-
-    {{!-- Verificar si no se debe usar el layout completo --}}
     {{#unless noLayout}}
-      {{!-- Si el usuario está autenticado, mostrar la estructura completa --}}
       {{#if isAuthenticated}}
         <div class="h-screen flex">
 
-          <!-- Barra lateral fija y más estrecha -->
-          <aside class="fixed top-0 left-0 h-full w-16 bg-gray-800 text-white flex flex-col items-center py-3 z-40">
-            <!-- Iconos grandes y centrados -->
-            <a href="/" class="mb-4 mt-12">
-              <i class="fas fa-home text-2xl"></i>
+          <!-- Barra lateral fija y más ancha -->
+          <aside class="fixed top-0 left-0 h-full w-24 bg-gray-800 text-white flex flex-col items-center py-3 z-40">
+            <!-- Iconos y etiquetas en columna -->
+            <br><br>
+            <a href="/" class="mb-6 flex flex-col items-center">
+              <i class="fas fa-home text-3xl"></i>
+              <label class="text-xs mt-2">Inicio</label>
             </a>
-            <a href="/verCartaR" class="mb-4">
-              <i class="fas fa-file-alt text-2xl"></i>
+            <a href="/verCartaR" class="mb-6 flex flex-col items-center">
+              <i class="fas fa-file-alt text-3xl"></i>
+              <label class="text-xs mt-2">Cartas</label>
             </a>
-            <a href="/servicios" class="mb-4">
-              <i class="fas fa-cog text-2xl"></i>
+            <a href="/servicios" class="mb-6 flex flex-col items-center">
+              <i class="fas fa-cog text-3xl"></i>
+              <label class="text-xs mt-2">Servicios</label>
             </a>
-            <a href="/verUsuario" class="mb-4">
-              <i class="fas fa-users text-2xl"></i>
+            <a href="/verUsuario" class="mb-6 flex flex-col items-center">
+              <i class="fas fa-users text-3xl"></i>
+              <label class="text-xs mt-2">Usuarios</label>
             </a>
-            <a href="/verUsuario" class="mt-auto mb-4">
-              <i class="fas fa-user text-2xl"></i>
+            <a href="/verUsuario" class="mt-auto mb-6 flex flex-col items-center">
+              <i class="fas fa-user text-3xl"></i>
+              <label class="text-xs mt-2">Perfil</label>
             </a>
           </aside>
 
-          <!-- Contenido principal ajustado para la barra lateral más estrecha -->
-          <div class="flex-grow flex flex-col ml-16">
-
-            <!-- Barra superior más delgada -->
-            <nav class="fixed top-0 left-16 right-0 flex items-center justify-between bg-gray-800 text-white px-4 py-3 z-50">
+          <!-- Contenido principal ajustado -->
+          <div class="flex-grow flex flex-col ml-24">
+            <nav class="fixed top-0 left-24 right-0 flex items-center justify-between bg-gray-800 text-white px-4 py-3 z-50">
               <div class="text-md font-semibold">{{name}}</div>
-
-              <!-- Botón de logout más pequeño -->
               <a href="/logout" class="bg-red-500 hover:bg-red-700 py-1 px-3 rounded-md">
                 <i class="fas fa-sign-out-alt"></i>
               </a>
             </nav>
-
-            <!-- Ajuste del contenido para la nueva barra superior y lateral -->
             <div class="flex-grow bg-white p-4 mt-14">
               {{{body}}}
             </div>
-
           </div>
         </div>
-
-      {{!-- Si no está autenticado, mostrar solo el contenido (Login/Register) --}}
       {{else}}
-        <div class="flex p-500  items-center justify-center h-screen">
+        <div class="flex items-center justify-center h-screen">
           <div class="bg-white p-5 rounded-lg shadow-lg w-full max-w-md">
             {{{body}}}
           </div>
         </div>
       {{/if}}
     {{else}}
-      <!-- Solo mostrar el contenido (body) cuando noLayout es true -->
       <div class="flex-grow bg-white p-4 mt-14">
         {{{body}}}
       </div>
     {{/unless}}
-
   </body>
+
 </html>

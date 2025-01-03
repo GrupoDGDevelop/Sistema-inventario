@@ -11,12 +11,12 @@
 
 <!-- Botón de retroceso -->
 <div class="mb-4">
-    <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-    </svg>
-    <span class="ml-2">Regresar</span>
-    </button>
+    <a href="/" class="text-gray-500 hover:text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span class="ml-2">Regresar</span>
+    </a>
 </div>
 
 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-12">
@@ -57,30 +57,34 @@
                 <tbody>
                     {{#each cartas}}
                     <tr class="border-b">
-                        <td class="px-4 py-2 text-gray-700">{{ID_Carta_R}}</td>
+                        <td class="px-4 py-2 text-gray-700">{{id_CartaR}}</td>
                         <td class="px-4 py-2 text-gray-700">{{Resumen}}</td>
                         <td class="px-4 py-2 text-gray-700">{{FechaU}}</td>
                         <!-- Mostrar el nombre del producto en lugar de Fk_Producto -->
-                        <td class="px-4 py-2 text-gray-700">{{Nom_Producto}}</td>
+                        <td class="px-4 py-2 text-gray-700">
+                            {{#each Fk_Producto}}
+                                {{Modelo}}{{#unless @last}}, {{/unless}}
+                            {{/each}}
+                        </td>
                         <!-- Mostrar el nombre del sistema en lugar de Fk_Sistema -->
-                        <td class="px-4 py-2 text-gray-700">{{Nom_Software}}</td>
+                        <td class="px-4 py-2 text-gray-700">{{Fk_Sistema.Nombre}}</td>
                         <!-- Mostrar el nombre de la agencia en lugar de Fk_Agencia -->
-                        <td class="px-4 py-2 text-gray-700">{{Nom_Agencia}}</td>
+                        <td class="px-4 py-2 text-gray-700">{{Fk_Agencia.Nombre}}</td>
                         <!-- Mostrar el nombre del usuario en lugar de Fk_Usuario -->
-                        <td class="px-4 py-2 text-gray-700">{{Nombre_U}}</td>
+                        <td class="px-4 py-2 text-gray-700">{{Fk_Usuario}}</td>
 
                         <td class="px-4 py-2 flex gap-2">
                             <!-- Botón de Descarga -->
-                            <a href="/imprimirCartaPDF/{{ID_Carta_R}}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded">
+                            <a href="/imprimirCartaPDF/{{id_CartaR}}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded">
                                 <i class="fas fa-download"></i>
                             </a>
                             <!-- Botón de Editar -->
-                            <a href="/editarCarta/{{ID_Carta_R}}" class="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded-sm">
+                            <a href="/editarCarta/{{_id}}" class="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded-sm">
                                 <i class="fas fa-pen"></i>
                             </a>
                             <!-- Botón de Eliminar -->
                             <form action="/eliminarCarta" method="POST" style="display: inline;">
-                                <input type="hidden" name="id_Carta" value="{{ID_Carta_R}}">
+                                <input type="hidden" name="id_Carta" value="{{_id}}">
                                 <button type="submit" class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded-sm">
                                     <i class="fas fa-trash"></i>
                                 </button>

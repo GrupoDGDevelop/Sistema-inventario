@@ -23,8 +23,8 @@ router.post('/crearProducto', ProductoController.print);
 
 router.get('/verProductos', ProductoController.verProductos);
 
-router.get('/producto/editar/:id_P', ProductoController.editarP);
-router.post('/producto/editar/:id_P', ProductoController.actualizar);
+//router.get('/producto/editar/:id_P', ProductoController.editarP);
+//router.post('/producto/editar/:id_P', ProductoController.actualizar);
 
 router.get('/producto/editarProducto/:id_P', ProductoController.editarProductos);
 router.post('/producto/editarProducto/:id_P', ProductoController.actualizarProducto);

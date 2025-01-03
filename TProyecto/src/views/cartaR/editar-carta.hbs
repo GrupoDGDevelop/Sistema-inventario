@@ -3,178 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Carta R</title>
+    <title>Editar Carta Responsiva</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
     <!-- Botón de retroceso -->
-<div class="mb-4">
-    <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-    </svg>
-    <span class="ml-2">Regresar</span>
-    </button>
-</div>
+        <div class="mb-4">
+            <a href="/verCartaR" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span class="ml-2">Regresar</span>
+            </a>
+        </div>
+        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-12 p-6">
+                <h1 class="text-3xl font-bold mb-8">Editar Carta Responsiva</h1>
 
-<div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
-    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-12 p-6">
-        <h1 class="text-3xl font-bold mb-8">Editar Carta R</h1>
-
-        <form action="/editarCarta/{{carta.ID_Carta_R}}" method="POST" class="space-y-6">
-
-            <!-- Datos -->
-            <div class="bg-gray-200 p-4 rounded-md mb-6 relative">
-                <h2 class="font-bold text-xl mb-4">Datos</h2>
-                <div class="grid grid-cols-1 gap-4">
-                    <div>
-                        <label class="font-semibold block mb-2">Num Serie</label>
-                        <input type="text" name="Num_Serie" value="{{carta.Num_Serie}}" class="border border-gray-300 rounded-md w-full p-2" placeholder="Número de Serie" required>
+                <form action="/editarCarta/{{carta._id}}" method="POST" class="space-y-6">
+                    
+                    <!-- Contenedor de Equipos -->
+                    <div id="equiposContainer">
+                        <!-- Descripción de Equipo Template -->
+                        <div class="equipo-item bg-gray-200 p-4 rounded-md mb-6">
+                            <h2 class="font-bold text-xl mb-4">Descripción de Equipo</h2>
+                            <div class="grid grid-cols-3 gap-4">
                     </div>
-
                     <div>
-                        <label class="font-semibold block mb-2">Resumen</label>
-                        <textarea name="Resumen" class="border border-gray-300 rounded-md w-full p-2" placeholder="Resumen" required>{{carta.Resumen}}</textarea>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Descripción de Equipo -->
-            <div class="bg-gray-200 p-4 rounded-md mb-6 relative">
-                <h2 class="font-bold text-xl mb-4">Descripción de Equipo</h2>
-                <a href="/producto/editar/{{carta.Fk_Producto}}" class="absolute top-4 right-4 bg-green-500 text-white hover:bg-green-700 font-bold py-2 px-4 rounded-md">Editar</a>
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <label class="font-semibold block mb-2">Tipo</label>
-                        <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Producto" id="productoSelect" required>
-                            <option value="" disabled selected>Seleccionar Producto</option>
-                            {{#each productos}}
-                                <option value="{{ID_Producto}}">{{Nom_Producto}}</option>
-                            {{/each}}
+                        <select id="productoSelect" class="border border-gray-300 rounded p-2">
+                            <option value="">Selecciona un producto</option>
+                            <!-- Opciones dinámicas se llenarán aquí -->
                         </select>
+                        <button id="addProductoBtn" type="button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                            Agregar Producto
+                        </button>
                     </div>
 
-                    <div>
-                        <label class="font-semibold block mb-2">Modelo</label>
-                        <input type="text" name="Modelo" id="modeloInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Modelo" required>
-                    </div>
-
-                    <div>
-                        <label class="font-semibold block mb-2">Proveedor</label>
-                        <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Proveedor" id="proveedorSelect">
-                            <option value="" disabled selected>Seleccionar Proveedor</option>
-                            {{#each proveedores}}
-                                <option value="{{Id_Proveedor}}">{{Nom_Proveedor}}</option>
+                    <!-- Tabla de productos -->
+                    <table class="table-fixed w-full mt-4">
+                        <thead>
+                            <tr class="bg-gray-500 text-white">
+                                <th class="w-1/4 py-4">Tipo de producto</th>
+                                <th class="w-1/6 py-4">Modelo</th>
+                                <th class="w-1/6 py-4">Características</th>
+                                <th class="w-1/6 py-4">Precio Total (MXN)</th>
+                                <th class="w-1/6 py-4">Marca</th>
+                                <th class="w-1/6 py-4">Proveedor</th>
+                                <th class="w-28 py-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each carta.Fk_Producto}}
+                            <tr class="bg-white border-b">
+                                <td class="p-3">{{Nom_Producto}}</td>
+                                <td class="p-3">{{Modelo}}</td>
+                                <td class="p-3">
+                                    {{Caracteristicas}}</td>
+                                <td class="p-3">{{Precio_Total}}</td>
+                                <td class="p-3">{{Nom_Marca}}</td>
+                                <td class="p-3">{{Nom_Proveedor}}</td>
+                                <td class="p-3 flex justify-center">
+                                    <button class="bg-red-500 text-white px-3 py-1 rounded-sm" onclick="eliminarFila(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
                             {{/each}}
-                        </select>
+                        </tbody>
+                    </table>
+
+
+                    <!-- Descripción de Software -->
+                    <div class="bg-gray-200 p-4 rounded-md mb-6">
+                        <h2 class="font-bold text-xl mb-4">Descripción de Software</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="font-semibold block mb-2">Software</label>
+                                <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Sistema" id="sistemaSelect" >
+                                    <option value="" {{#unless carta.Fk_Sistema}}selected{{/unless}}>Sin Software</option>
+                                    {{#each sistemas}}
+                                        <option value="{{ID_Sistemas}}" 
+                                            {{#ifCond Nom_Software ../carta.Fk_Sistema.Nombre}}selected{{/ifCond}}>
+                                            {{Nom_Software}}
+                                        </option>
+                                    {{/each}}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="font-semibold block mb-2">Licencia</label>
+                                <input type="text" name="Licencia" id="licenciaInput" 
+                                    class="border border-gray-300 rounded-md w-full p-2" 
+                                    placeholder="Licencia" 
+                                    value="{{#if carta.Fk_Sistema}}{{carta.Fk_Sistema.Licencia}}{{/if}}">
+                            </div>
+
+                            <div>
+                                <label class="font-semibold block mb-2">Versión</label>
+                                <input type="text" name="Version" id="versionInput" 
+                                    class="border border-gray-300 rounded-md w-full p-2" 
+                                    placeholder="Versión" 
+                                    value="{{#if carta.Fk_Sistema}}{{carta.Fk_Sistema.Version}}{{/if}}">
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="font-semibold block mb-2">Marca</label>
-                        <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Marca" id="marcaSelect">
-                            <option value="" disabled selected>Seleccionar Marca</option>
-                            {{#each marcas}}
-                                <option value="{{Id_Marca}}">{{Nom_Marca}}</option>
-                            {{/each}}
-                        </select>
+
+                    <!-- Datos de Área -->
+                    <div class="bg-gray-200 p-4 rounded-md mb-6">
+                        <h2 class="font-bold text-xl mb-4">Datos de Área</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                            <label class="font-semibold block mb-2">Departamento</label>
+                            <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Agencia" id="agenciaSelect">
+                                <option value="" disabled>Seleccionar Departamento</option>
+                                {{#each agencias}}
+                                    <option value="{{Id_Area}}" 
+                                        {{#ifCond Id_Area ../carta.Fk_Agencia.Id_Area}}selected{{/ifCond}}>
+                                        {{Nom_Agencia}}
+                                    </option>
+                                {{/each}}
+                            </select>
+
+                            </div>
+
+                            <div>
+                                <label class="font-semibold block mb-2">Num Agencia</label>
+                                <input type="text" name="Num_Agencia" id="numAgenciaInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Número de Agencia" value="{{carta.Fk_Agencia.Num_Agencia}}">
+                            </div>
+                            <div>
+                                <label class="font-semibold block mb-2">Departamento</label>
+                                <input type="text" name="Departamento" id="departamentoInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Número de Agencia" value="{{carta.Fk_Agencia.Departamento}}">
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="font-semibold block mb-2">Precio Total</label>
-                        <input type="text" name="Precio_Total" id="precioInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Precio Total">
+                    <!-- Datos del usuario -->
+                    <div class="bg-gray-200 p-4 rounded-md mb-6">
+                        <h2 class="font-bold text-xl mb-4">Datos del Usuario</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="font-semibold block mb-2">Nombre del Encargado</label>
+                                <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Usuario" id="usuarioSelect">
+                                    <option value="" disabled>Seleccionar Usuario</option>
+                                    {{#each usuarios}}
+                                        <option value="{{ID_Usuario}}" 
+                                            {{#ifCond Nombre_U ../carta.Fk_Usuario}}selected{{/ifCond}}>
+                                            {{Nombre_U}}
+                                        </option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="flex items-center">
-                        <label class="font-semibold block mr-2">+IVA</label>
-                        <input type="checkbox" name="IVA" id="ivaCheckbox" class="border-gray-300">
+                    <!-- Datos -->
+                    <div class="bg-gray-200 p-4 rounded-md mb-6">
+                        <h2 class="font-bold text-xl mb-4">Datos</h2>
+                        <div class="grid grid-cols-1 gap-4">
+
+                            <div>
+                                <label class="font-semibold block mb-2">Resumen</label>
+                                <textarea name="Resumen" class="border border-gray-300 rounded-md w-full p-2" placeholder="Resumen" required>{{carta.Resumen}}</textarea>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Guardar</button>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="col-span-3">
-                        <label class="font-semibold block mb-2">Características</label>
-                        <textarea name="Caracteristicas" id="caracteristicasTextarea" class="border border-gray-300 rounded-md w-full p-2" placeholder="Características"></textarea>
-                    </div>
-                </div>
+                    <!-- Campo oculto para FechaU -->
+                    <input type="hidden" name="FechaU" id="FechaU" value="{{fechaActual}}">
+
+                </form>
             </div>
-
-            <!-- Descripción de Software -->
-            <div class="bg-gray-200 p-4 rounded-md mb-6 relative">
-                <h2 class="font-bold text-xl mb-4">Descripción de Software</h2>
-                <a href="/software/editar//{{carta.Fk_Sistema}}" class="absolute top-4 right-4 bg-green-500 text-white hover:bg-green-700 font-bold py-2 px-4 rounded-md">Editar</a>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="font-semibold block mb-2">Software</label>
-                        <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Sistema" id="sistemaSelect" required>
-                            <option value="" disabled selected>Seleccionar Sistema</option>
-                            {{#each sistemas}}
-                                <option value="{{ID_Sistemas}}">{{Nom_Software}}</option>
-                            {{/each}}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="font-semibold block mb-2">Licencia</label>
-                        <input type="text" name="Licencia" id="licenciaInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Licencia">
-                    </div>
-
-                    <div>
-                        <label class="font-semibold block mb-2">Versión</label>
-                        <input type="text" name="Version" id="versionInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Versión">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Datos de Área -->
-            <div class="bg-gray-200 p-4 rounded-md mb-6 relative">
-                <h2 class="font-bold text-xl mb-4">Datos de Área</h2>
-                <a href="/editarAgencia/{{carta.Fk_Agencia}}" class="absolute top-4 right-4 bg-green-500 text-white hover:bg-green-700 font-bold py-2 px-4 rounded-md">Editar</a>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="font-semibold block mb-2">Departamento</label>
-                        <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Agencia" id="agenciaSelect">
-                            <option value="" disabled selected>Seleccionar Departamento</option>
-                            {{#each agencias}}
-                                <option value="{{Id_Area}}">{{Nom_Agencia}}</option>
-                            {{/each}}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="font-semibold block mb-2">Num Agencia</label>
-                        <input type="text" name="Num_Agencia" id="numAgenciaInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Número de Agencia">
-                    </div>
-                    <div>
-                        <label class="font-semibold block mb-2">Departamento</label>
-                        <input type="text" name="Departamento" id="departamentoInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Número de Agencia">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Datos del usuario -->
-            <div class="bg-gray-200 p-4 rounded-md mb-6">
-                <h2 class="font-bold text-xl mb-4">Datos del Usuario</h2>
-                <a href="/usuario/editar/{{carta.Fk_Usuario}}" class="absolute top-4 right-4 bg-green-500 text-white hover:bg-green-700 font-bold py-2 px-4 rounded-md">Editar</a>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="font-semibold block mb-2">Nombre del Encargado</label>
-                        <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Usuario" id="usuarioSelect">
-                            <option value="" disabled selected>Seleccionar Usuario</option>
-                            {{#each usuarios}}
-                                <option value="{{ID_Usuario}}">{{Nombre_U}}</option>
-                            {{/each}}
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Enviar formulario -->
-            <div class="flex justify-end">
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md">Guardar Cambios</button>
-            </div>
-        </form>
-    </div>
-</div>
+        </div>
 
 <script>
+
+    // Función para cargar los productos en el combo box
+    async function cargarProductos() {
+        try {
+            const response = await fetch('/verProductos'); // Ruta para obtener los productos
+            const data = await response.json();
+
+            if (response.ok) {
+                const productos = data.productos;
+
+                // Obtener el combo box
+                const productoSelect = document.getElementById('productoSelect');
+
+                // Limpiar el combo box antes de llenarlo
+                productoSelect.innerHTML = '<option value="">Selecciona un producto</option>';
+
+                // Llenar el combo box con los productos
+                productos.forEach(producto => {
+                    const opcion = document.createElement('option');
+                    opcion.value = JSON.stringify(producto); // Guardar el producto completo como valor
+                    opcion.textContent = producto.Modelo;
+                    productoSelect.appendChild(opcion);
+                });
+            } else {
+                console.error('Error al cargar productos:', data.mensaje);
+            }
+        } catch (error) {
+            console.error('Error al conectar con el servidor:', error);
+        }
+    }
+
+        // Función para agregar un producto seleccionado a la tabla
+    function agregarProductoATabla() {
+        const productoSelect = document.getElementById('productoSelect');
+        const tbody = document.querySelector('tbody');
+
+        // Obtener el producto seleccionado
+        const productoSeleccionado = productoSelect.value;
+
+        if (!productoSeleccionado) {
+            alert('Por favor, selecciona un producto.');
+            return;
+        }
+
+        // Parsear el producto y crear una fila
+        const producto = JSON.parse(productoSeleccionado);
+        const fila = document.createElement('tr');
+        fila.classList.add('bg-white', 'border-b');
+
+        fila.innerHTML = `
+            <td class="p-3">${producto.Nom_Producto}</td>
+            <td class="p-3">${producto.Modelo}</td>
+            <td class="p-3">${producto.Caracteristicas}</td>
+            <td class="p-3">${producto.Precio_Total}</td>
+            <td class="p-3">${producto.Nom_Marca}</td>
+            <td class="p-3">${producto.Nom_Proveedor}</td>
+            <td class="p-3 flex justify-center">
+                <button class="bg-red-500 text-white px-3 py-1 rounded-sm" onclick="eliminarFila(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <a href="/producto/editarProducto/${producto.ID_Producto}" class="bg-green-500 text-white px-3 py-1 rounded-sm">
+                    <i class="fas fa-pen"></i>
+                </a>
+            </td>
+        `;
+
+        // Agregar la fila al cuerpo de la tabla
+        tbody.appendChild(fila);
+
+        // Reiniciar el combo box
+        productoSelect.value = '';
+    }
+
+    // Función para eliminar una fila de la tabla
+    function eliminarFila(boton) {
+            const fila = boton.closest('tr');
+            fila.remove();
+        }
+
+        // Llamar a cargarProductos cuando la página cargue
+        window.onload = cargarProductos;
+
+        // Asignar eventos
+        document.getElementById('addProductoBtn').addEventListener('click', agregarProductoATabla);
+
+
     // Función para manejar cambios en los select y autocompletar los campos
     function cargarDatos(tipo, id) {
         fetch(`/crearCartaR/${tipo}/${id}`)
@@ -182,19 +274,6 @@
             .then(data => {
                 if (data) {
                     switch(tipo) {
-                        case 'producto':
-                            document.getElementById('modeloInput').value = data.modelo || '';
-                            document.getElementById('precioInput').value = data.precio_total || '';
-                            document.getElementById('caracteristicasTextarea').value = data.caracteristicas || '';
-
-                            // Set Marca and Proveedor select options based on fetched data
-                            const marcaSelect = document.getElementById('marcaSelect');
-                            const proveedorSelect = document.getElementById('proveedorSelect');
-                            
-                            // Clear existing options and set the correct one based on data
-                            marcaSelect.innerHTML = `<option value="${data.marca_id}" selected>${data.marca}</option>`;
-                            proveedorSelect.innerHTML = `<option value="${data.proveedor_id}" selected>${data.proveedor}</option>`;
-                            break;
                         case 'sistema':
                             document.getElementById('licenciaInput').value = data.licencia || '';
                             document.getElementById('versionInput').value = data.version || '';
@@ -212,12 +291,131 @@
             .catch(error => console.error(`Error al obtener los datos de ${tipo}:`, error));
     }
 
+    document.querySelector('form').addEventListener('submit', async (event) => {
+    event.preventDefault(); // Evita recargar la página
+
+    // Capturar los valores seleccionados del formulario
+    const resumen = document.querySelector('[name="Resumen"]').value;
+
+    // Capturar el valor de Fk_Sistema (texto en lugar de ID)
+    const sistemaSelect = document.querySelector('[name="Fk_Sistema"]');
+    const Fk_Sistema = sistemaSelect.options[sistemaSelect.selectedIndex]?.textContent.trim();
+
+    // Capturar los valores adicionales de Fk_Sistema
+    const licencia = document.querySelector('#licenciaInput').value.trim();
+    const version = document.querySelector('#versionInput').value.trim();
+
+    // Capturar el valor de Fk_Agencia (texto en lugar de ID)
+    const agenciaSelect = document.querySelector('[name="Fk_Agencia"]');
+    const Fk_Agencia = agenciaSelect.options[agenciaSelect.selectedIndex]?.textContent.trim();
+
+    // Capturar los valores adicionales de Fk_Agencia
+    const numAgencia = document.querySelector('#numAgenciaInput').value.trim();
+    const departamento = document.querySelector('#departamentoInput').value.trim();
+
+    // Capturar el valor de Fk_Usuario (texto en lugar de ID)
+    const usuarioSelect = document.querySelector('[name="Fk_Usuario"]');
+    const Fk_Usuario = usuarioSelect.options[usuarioSelect.selectedIndex]?.textContent.trim();
+
+    const fechaU = document.querySelector('#FechaU').value;
+
+    // Construir el array de productos desde la tabla
+    const productos = Array.from(document.querySelectorAll('tbody tr')).map(tr => {
+        const cells = tr.querySelectorAll('td');
+        return {
+            Nom_Producto: cells[0]?.textContent.trim(),
+            Modelo: cells[1]?.textContent.trim(),
+            Caracteristicas: cells[2]?.textContent.trim(),
+            Precio_Total: cells[3]?.textContent.trim(),
+            Nom_Marca: cells[4]?.textContent.trim(),
+            Nom_Proveedor: cells[5]?.textContent.trim()
+        };
+    });
+
+    // Validar que haya al menos un producto en la tabla
+    if (productos.length === 0) {
+        alert('Debe haber al menos un producto en la carta para poder crearse.');
+        return; // Detener el envío si no hay productos
+    }
+
+
+    // Crear el objeto a enviar
+    const cartaResponsiva = {
+        Fk_Producto: productos, // Array de productos
+        Fk_Sistema: {
+            Nombre: Fk_Sistema,
+            Licencia: licencia,
+            Version: version
+        },  // Incluye los detalles adicionales
+        Fk_Agencia: {
+            Nombre: Fk_Agencia,
+            Num_Agencia: numAgencia,
+            Departamento: departamento
+        },  // Incluye los detalles adicionales
+        Fk_Usuario,  // Usando el nombre del usuario, no el ID
+        Resumen: resumen,
+    };
+
+    try {
+        // Hacer el POST al backend
+        const response = await fetch('/editarCarta/{{carta._id}}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(cartaResponsiva),
+        });
+
+        if (response.ok) {
+            const contentType = response.headers.get('Content-Type');
+            if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+                alert('Carta responsiva actualizada exitosamente');
+                setTimeout(() => {
+                    window.location.href = '/verCartaR'; // Redirigir a la vista
+                }, 100); // Retraso de 0.1 segundos
+                console.log(data);
+            } else {
+                alert('Carta responsiva actualizada exitosamente');
+                setTimeout(() => {
+                    window.location.href = '/verCartaR'; // Redirigir a la vista
+                }, 100); // Retraso de 0.1 segundos
+                console.log(await response.text()); // Leer el texto (HTML)
+            }
+        } else {
+            alert('Error al crear la carta responsiva');
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al enviar los datos');
+    }
+});
+
     // Agregar event listeners a cada select para llamar cargarDatos con el tipo adecuado
     document.getElementById('productoSelect').addEventListener('change', function() {
         cargarDatos('producto', this.value);
     });
     document.getElementById('sistemaSelect').addEventListener('change', function() {
-        cargarDatos('sistema', this.value);
+        // Obtener los campos de licencia y versión
+        const licenciaInput = document.getElementById('licenciaInput');
+        const versionInput = document.getElementById('versionInput');
+
+        // Verificar si el valor seleccionado es "Sin Software"
+        if (this.value === "") {
+            // Limpiar los campos de licencia y versión
+            licenciaInput.value = "";
+            versionInput.value = "";
+
+            // Deshabilitar los campos para evitar edición
+            licenciaInput.disabled = true;
+            versionInput.disabled = true;
+        } else {
+            // Habilitar los campos cuando se seleccione un software diferente
+            licenciaInput.disabled = false;
+            versionInput.disabled = false;
+            cargarDatos('sistema', this.value);
+        }
     });
     document.getElementById('agenciaSelect').addEventListener('change', function() {
         cargarDatos('agencia', this.value);

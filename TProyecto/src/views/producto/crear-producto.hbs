@@ -166,13 +166,13 @@
 
                     // Agregar características al contenedor
                     caracteristicas.forEach((caracteristica) => {
+                        console.log(caracteristica);
                         agregarCaracteristica(caracteristica, container);
                     });
                 })
                 .catch(error => console.error('Error al obtener las características:', error));
         }
     });
-
 
 
    function agregarCaracteristica(caracteristica, container) {
@@ -190,15 +190,15 @@
             'text-lg', 'focus:bg-white', 'w-1/5', 'min-w-[150px]'
         );
         tipoDatoSelect.innerHTML = `
-            <option value="text" ${caracteristica.tipo_valor === 'text' ? 'selected' : ''}>Texto</option>
-            <option value="number" ${caracteristica.tipo_valor === 'number' ? 'selected' : ''}>Numérico</option>
-            <option value="boolean" ${caracteristica.tipo_valor === 'boolean' ? 'selected' : ''}>Sí/No</option>
+            <option value="text" ${caracteristica.tipoDato === 'text' ? 'selected' : ''}>Texto</option>
+            <option value="number" ${caracteristica.tipoDato === 'number' ? 'selected' : ''}>Numérico</option>
+            <option value="boolean" ${caracteristica.tipoDato === 'boolean' ? 'selected' : ''}>Sí/No</option>
         `;
         tipoDatoSelect.name = 'tipoDatoSelect';
 
         // Campo de entrada dinámico (input o select)
         let campoDinamico;
-        if (caracteristica.tipo_valor === 'boolean') {
+        if (caracteristica.tipoDato === 'boolean') {
             campoDinamico = document.createElement('select');
             campoDinamico.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'w-1/2');
             campoDinamico.innerHTML = `
@@ -206,11 +206,14 @@
                 <option value="Sí">Sí</option>
                 <option value="No">No</option>
             `;
+            campoDinamico.value = caracteristica.valor;
+            campoDinamico.required =  true;
         } else {
             campoDinamico = document.createElement('input');
-            campoDinamico.type = caracteristica.tipo_valor || 'text';
+            campoDinamico.type = caracteristica.tipoDato || 'text';
             campoDinamico.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'focus:bg-white', 'w-1/2', 'min-w-[180px]', 'h-12');
-            campoDinamico.placeholder = `Ingrese ${caracteristica.caracteristica}`;
+            campoDinamico.placeholder = `Ingrese ${caracteristica.nombre}`;
+            campoDinamico.required = true
         }
 
         // Checkbox para opcional
@@ -239,8 +242,8 @@
 
         // Crear el elemento label para la caracteristica
         let labelCaracteristica = document.createElement('label');
-        if (caracteristica.caracteristica) {
-            labelCaracteristica.textContent = caracteristica.caracteristica;
+        if (caracteristica.nombre) {
+            labelCaracteristica.textContent = caracteristica.nombre;
         } else {
             labelCaracteristica.textContent = caracteristica;
         }
@@ -292,7 +295,7 @@
 
         // Cargar las opciones del select desde el servidor una sola vez cuando la página se carga
         try {
-            const response = await fetch('/caracteristicas'); // Ajusta la ruta según tu configuración
+            const response = await fetch('/caracteristicas'); // Obtener las características disponibles
 
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
@@ -356,6 +359,34 @@
         }
     });
 
+    async function actualizarSelectCaracteristicas() {
+        const selectElement = document.getElementById('caracteristicasSelect');
+
+        try {
+            const response = await fetch('/caracteristicas');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+
+            if (Array.isArray(data)) {
+                // Limpiar las opciones existentes
+                selectElement.innerHTML = '<option value="">Agregar característica</option>';
+
+                // Agregar las nuevas opciones
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.caracteristica;
+                    option.textContent = item.caracteristica;
+                    selectElement.appendChild(option);
+                });
+            } else {
+                throw new Error('El formato de los datos no es válido.');
+            }
+        } catch (error) {
+            console.error('Error al actualizar el select:', error);
+        }
+    }
+
 
     // Evento para el primer contenedor (Crear nueva característica)
     document.getElementById('agregarCaracteristicaButton').addEventListener('click', async function(event) {
@@ -383,7 +414,8 @@
             if (response.ok) {
                 alert("Característica agregada con éxito.");
                 document.getElementById('nuevaCaracteristicaInput').value = ""; // Limpiar el input
-                window.location.reload(); // Recargar la página
+                //window.location.reload(); // Recargar la página
+                actualizarSelectCaracteristicas();
             } else {
                 alert("Error al agregar la característica.");
             }
@@ -396,7 +428,6 @@
 
     document.querySelector('form').addEventListener('submit', async (event) => {
         event.preventDefault(); // Evita recargar la página
-        //event.preventDefault(); // Evita recargar la página
 
         // Capturar los valores del formulario
         const tipoProducto = document.getElementById('tipoProducto').value;
@@ -414,12 +445,8 @@
 
         // Validar que los datos clave existan
         if (tipoDatoSelect && valor && nombre) {
+            console.log({ tipoDatoSelect, valor, nombre, opcional });
             return { nombre, tipoDato: tipoDatoSelect, valor, opcional };
-        const name = div.previousElementSibling?.querySelector('label:nth-child(2)')?.textContent.trim() || 'Sin nombre'; // Nombre (label anterior al grupo)
-
-        // Validar que los datos clave existan
-        if (tipoDatoSelect && valor && nombre) {
-            return { name, tipo_valor: tipoDatoSelect, valor, opcional };
         }
 
         console.warn('Campo faltante en característica, omitiendo:', { tipoDatoSelect, valor, nombre, opcional });
@@ -435,7 +462,7 @@
             caracteristicas,
             Fk_Marca, // Aquí va "DELL" o el valor seleccionado
             Fk_Proveedor, // Aquí va el nombre del proveedor
-            nota,
+            nota
         };
 
         try {

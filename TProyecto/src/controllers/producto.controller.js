@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 
-
 function verProducto(req, res) {
     // Obtiene y muestra todos los productos, incluyendo su marca y proveedor relacionados.
     req.getConnection((err, conn) => {
@@ -55,12 +54,23 @@ async function crearP(req, res) {
             const queryMarcas = 'SELECT Id_Marca, Nom_Marca FROM Marca';
             const queryProveedores = 'SELECT Id_Proveedor, Nom_Proveedor FROM Proveedor';
 
+
             const marcas = await new Promise((resolve, reject) => {
                 conn.query(queryMarcas, (err, results) => {
                     if (err) reject(err);
                     resolve(results);
                 });
             });
+
+
+
+            const marcas = await new Promise((resolve, reject) => {
+                conn.query(queryMarcas, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                });
+            });
+
 
             const proveedores = await new Promise((resolve, reject) => {
                 conn.query(queryProveedores, (err, results) => {
@@ -293,6 +303,8 @@ async function agregarProducto(req, res) {
         res.status(500).json({ message: 'Error al crear el producto' });
     }
 }
+
+
 
 // Función para obtener productos desde la base de datos
 async function verProductos(req, res) {

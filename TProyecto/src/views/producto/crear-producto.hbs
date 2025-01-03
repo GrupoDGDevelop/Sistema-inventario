@@ -4,11 +4,14 @@
 <body>
 
 <div class="mb-4">
+    <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700">
     <a href="/verProducto" class="text-gray-500 hover:text-gray-700">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
         <span class="ml-2">Regresar</span>
+    </button>
+</div>
     </a>
 </div>
 
@@ -329,6 +332,7 @@
 
     // Evento para el segundo contenedor (Agregar nuevo tipo de producto)
     document.getElementById('nuevoTipoProductoForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // Evita recargar la página
 
         const tipoProducto = document.getElementById('nuevoTipoProductoInput').value.trim();
         if (!tipoProducto) {
@@ -386,6 +390,7 @@
 
     // Evento para el primer contenedor (Crear nueva característica)
     document.getElementById('agregarCaracteristicaButton').addEventListener('click', async function(event) {
+        event.preventDefault(); // Evita recargar la página
 
         const nombreCaracteristica = document.getElementById('nuevaCaracteristicaInput').value.trim();
         if (!nombreCaracteristica) {

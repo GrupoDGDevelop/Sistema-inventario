@@ -7,6 +7,11 @@ router.get('/verProducto', ProductoController.verProducto);
 
 router.post('/verProducto/buscarP', ProductoController.buscarP);
 
+
+//router.get('/crearProducto', ProductoController.crearP);
+router.get('/caracteristicas/:tipoProducto', ProductoController.obtenerCaracteristicas);
+router.get('/caracteristicas/', ProductoController.unicas);
+
 router.get('/crearProducto', ProductoController.crearP);
 router.get('/caracteristicas/:tipoProducto', ProductoController.obtenerCaracteristicas);
 router.get('/caracteristicas/', ProductoController.unicas);

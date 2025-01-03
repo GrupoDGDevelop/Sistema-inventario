@@ -20,6 +20,8 @@ router.post('/nuevoTipoProducto', ProductoController.agregarTipoProducto);
 router.post('/nuevaCaracteristica', ProductoController.agregarCaracteristica);
 router.post('/nuevoProducto', ProductoController.agregarProducto)
 router.post('/crearProducto', ProductoController.print);
+router.post('/eliminarCaracteristica/:caracteristica', ProductoController.eliminarCaracteristica);
+router.post('/eliminarTipoProducto/:tipoProducto', ProductoController.eliminarTipoProducto);
 
 router.get('/verProductos', ProductoController.verProductos);
 

@@ -62,16 +62,6 @@ async function crearP(req, res) {
                 });
             });
 
-
-
-            const marcas = await new Promise((resolve, reject) => {
-                conn.query(queryMarcas, (err, results) => {
-                    if (err) reject(err);
-                    resolve(results);
-                });
-            });
-
-
             const proveedores = await new Promise((resolve, reject) => {
                 conn.query(queryProveedores, (err, results) => {
                     if (err) reject(err);
@@ -113,6 +103,7 @@ async function obtenerCaracteristicas(req, res) {
     }
 }
 
+// Función para obtener las características únicas de los productos
 async function unicas(req, res) {
     try {
         // Conexión directa a la base de datos
@@ -122,8 +113,8 @@ async function unicas(req, res) {
         // Consulta para obtener las características únicas
         const resultado = await collection.aggregate([
             { $unwind: "$caracteristicas" }, // Descomponemos el array de características
-            { $group: { _id: "$caracteristicas.caracteristica" } }, // Agrupamos por característica
-            { $project: { _id: 0, caracteristica: "$_id" } }, // Seleccionamos solo el campo `caracteristica`
+            { $group: { _id: "$caracteristicas.nombre" } }, // Agrupamos por característica
+            { $project: { _id: 0, nombre: "$_id" } }, // Seleccionamos solo el campo `caracteristica`
             { $sort: { caracteristica: 1 } } // Ordenamos alfabéticamente
         ]).toArray(); // Convertimos el cursor a un array
 
@@ -186,7 +177,7 @@ async function agregarTipoProducto(req, res) {
         res.status(500).json({ error: 'Error al agregar el tipo de producto' });
     }
 }
-
+// Función para agregar una nueva característica a un tipo de producto
 async function agregarCaracteristica(req, res) {
     try {
         const { nombreCaracteristica, tipoValor, numCaracteresMin, numCaracteresMax, opcional } = req.body;
@@ -204,7 +195,7 @@ async function agregarCaracteristica(req, res) {
 
         // Crear la nueva característica
         const nuevaCaracteristica = {
-            caracteristica: nombreCaracteristica,
+            nombre: nombreCaracteristica,
             tipo_valor: tipoValor,
             num_caracteres_min: numCaracteresMin,
             num_caracteres_max: numCaracteresMax,
@@ -228,6 +219,55 @@ async function agregarCaracteristica(req, res) {
     }
 }
 
+async function eliminarTipoProducto(req, res) {
+    console.log(req.params);
+    const tipoProducto = req.params.tipoProducto;
+
+    try {
+        const db = mongoose.connection.db;
+
+        const result = await db.collection('tipos_productos').deleteOne({ tipo_producto: tipoProducto });
+
+        res.status(200).json({
+            message: 'Tipo de producto eliminado exitosamente',
+            deletedCount: result.deletedCount,
+        });
+    } catch (err) {
+        console.error('Error al eliminar tipo de producto:', err);
+        res.status(500).json({ error: 'Error al eliminar el tipo de producto' });
+    }
+}
+
+async function eliminarCaracteristica(req, res) {
+    const nombreCaracteristica = req.params.caracteristica; // Usar parámetro de la ruta
+
+    try {
+        const db = mongoose.connection.db;
+        const collection = db.collection('tipos_productos');
+
+        const productoBase = await collection.findOne({ tipo_producto: 'producto_base' });
+
+        if (!productoBase) {
+            return res.status(404).json({ mensaje: 'Producto base no encontrado' });
+        }
+
+        const nuevasCaracteristicas = productoBase.caracteristicas.filter(
+            c => c.nombre !== nombreCaracteristica
+        );
+
+        await collection.updateOne(
+            { tipo_producto: 'producto_base' },
+            { $set: { caracteristicas: nuevasCaracteristicas } }
+        );
+
+        res.status(200).json({ mensaje: 'Característica eliminada exitosamente', caracteristicas: nuevasCaracteristicas });
+    } catch (error) {
+        console.error("Error al eliminar la característica:", error);
+        res.status(500).json({ mensaje: "Error al eliminar la característica", error });
+    }
+}
+
+
 async function agregarProducto(req, res) {
     try {
         // Conexión a la base de datos
@@ -239,7 +279,7 @@ async function agregarProducto(req, res) {
         const { tipoProducto, caracteristicas, Fk_Marca, Fk_Proveedor, nota } = req.body;
 
         // Validar los datos requeridos
-        if (!tipoProducto || !Fk_Marca || !Fk_Proveedor || !nota) {
+        if (!tipoProducto || !Fk_Marca || !Fk_Proveedor) {
             return res.status(400).json({ message: 'Faltan datos requeridos' });
         }
 
@@ -254,23 +294,43 @@ async function agregarProducto(req, res) {
         const caracteristicasTipoProducto = tipoProductoData.caracteristicas || [];
         const nuevasCaracteristicas = [...caracteristicas]; // Clonar las características enviadas
         const caracteristicasFaltantes = []; // Para agregar nuevas características a `tipos_productos`
+        const nombresCaracteristicasProducto = caracteristicas.map(c => c.nombre);
 
+        // Identificar características faltantes y sobrantes
         for (const caracteristicaProducto of caracteristicas) {
             // Verificar si la característica está en `tipos_productos`
             const existe = caracteristicasTipoProducto.some(
-                c => c.caracteristica === caracteristicaProducto.nombre
+                c => c.nombre === caracteristicaProducto.nombre
             );
 
-            if (!existe) {
+            if (!existe && caracteristicaProducto.opcional === false) {
                 // Si no existe, agregarla a `tipos_productos`
                 caracteristicasFaltantes.push({
-                    caracteristica: caracteristicaProducto.nombre,
+                    nombre: caracteristicaProducto.nombre,
                     tipoDato: caracteristicaProducto.tipoDato,
                     num_caracteres_min: caracteristicaProducto.num_caracteres_min || 0,
                     num_caracteres_max: caracteristicaProducto.num_caracteres_max || 255,
                     opcional: caracteristicaProducto.opcional || false
                 });
             }
+        }
+
+        // Características que deben eliminarse
+        const caracteristicasSobrantes = caracteristicasTipoProducto.filter(
+            c => !nombresCaracteristicasProducto.includes(c.nombre)
+        );
+
+        // Eliminar características sobrantes
+        if (caracteristicasSobrantes.length > 0) {
+            const nombresCaracteristicasSobrantes = caracteristicasSobrantes.map(c => c.nombre);
+            await tiposProductosCollection.updateOne(
+                { tipo_producto: tipoProducto },
+                {
+                    $pull: {
+                        caracteristicas: { nombre: { $in: nombresCaracteristicasSobrantes } }
+                    }
+                }
+            );
         }
 
         // Actualizar el tipo de producto con nuevas características si hay alguna faltante
@@ -280,7 +340,7 @@ async function agregarProducto(req, res) {
                 { $push: { caracteristicas: { $each: caracteristicasFaltantes } } }
             );
         }
-1
+
         // Crear el objeto del nuevo producto con características validadas
         const nuevoProducto = {
             tipoProducto,
@@ -303,8 +363,6 @@ async function agregarProducto(req, res) {
         res.status(500).json({ message: 'Error al crear el producto' });
     }
 }
-
-
 
 // Función para obtener productos desde la base de datos
 async function verProductos(req, res) {
@@ -335,7 +393,7 @@ async function verProductos(req, res) {
         res.status(500).json({ mensaje: "Error al obtener productos", error });
     }
 }
-
+// Función para cargar los datos de un producto específico para editar
 async function editarProductos(req, res) {
     const id_P = req.params.id_P;
     console.log("ID del producto recibido:", id_P);
@@ -418,7 +476,7 @@ async function editarProductos(req, res) {
         return respuestaJson ? res.status(500).json(errorMensaje) : res.status(500).render('error', errorMensaje);
     }
 }
-
+// Función para actualizar un producto en la base de datos
 async function actualizarProducto(req, res) {
     const id_P = req.body.id_P;
     const data = req.body;
@@ -445,8 +503,6 @@ async function actualizarProducto(req, res) {
         res.status(500).json({ message: 'Error al actualizar el producto' });
     }
 }
-
-
 
 function print(req, res) {
     // Inserta un nuevo producto en la base de datos y redirige a la lista de productos.
@@ -513,7 +569,7 @@ function actualizar(req, res) {
 }
 
 const { ObjectId } = require('mongodb');
-
+//  Función para eliminar un producto específico
 async function eliminarP(req, res) {
     const id_P = req.body.id_P; // El ID del producto a eliminar
 
@@ -559,4 +615,6 @@ module.exports = {
     actualizar: actualizar,
     editarP: editarP,
     eliminarP: eliminarP,
+    eliminarTipoProducto: eliminarTipoProducto,
+    eliminarCaracteristica : eliminarCaracteristica
 };

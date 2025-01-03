@@ -4,14 +4,11 @@
 <body>
 
 <div class="mb-4">
-    <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700">
     <a href="/verProducto" class="text-gray-500 hover:text-gray-700">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
         <span class="ml-2">Regresar</span>
-    </button>
-</div>
     </a>
 </div>
 
@@ -59,6 +56,9 @@
                     <option value="" disabled selected>Agregar característica</option>
                 </select>
             </div>
+            
+            <button type="button" id="actualizarCaracteristicasProductoButton" class="hidden rounded-md bg-gray-500 w-full text-lg text-white font-semibold p-2 my-3
+                hover:bg-gray-500 focus:bg-gray-700">Actualizar caracteristicas del tipo de producto</button>
 
             <!-- Sección de marca -->
             <label class="text-lg font-semibold w-full block mt-4">Marca</label>
@@ -87,7 +87,7 @@
             <!-- Sección de nota -->
             <label class="text-lg font-semibold w-full block mt-4">Nota</label>
             <input type="text" class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
-                p-2 my-2 focus:bg-white" placeholder="Agregue información relevante si es necesario para el producto" name="notaInput" required>
+                p-2 my-2 focus:bg-white" placeholder="Agregue información relevante si es necesario para el producto" name="notaInput">
 
             <!-- Botón de guardar -->
             <button type="submit" class="rounded-md bg-gray-500 w-full text-lg text-white font-semibold p-2 my-3
@@ -115,6 +115,20 @@
             >
                 Agregar
             </button>
+            <div class="flex justify-center">
+                <select id="eliminarCaracteristicasSelect" class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
+                    p-2 my-2 focus:bg-white" >
+                    <option value="" disabled selected>Seleccionar característica</option>
+                </select>
+            </div>
+            <button 
+                type="button" 
+                id="eliminarCaracteristicaButton" 
+                class="rounded-md bg-gray-500 w-full text-lg text-white font-semibold p-2 my-3 hover:bg-gray-500 focus:bg-gray-700"
+                    >
+                Eliminar caracteristica de la lista
+            </button>
+            
         </div>
 
         <!-- Segundo contenedor -->
@@ -138,6 +152,32 @@
                     Agregar
                 </button>
             </form>
+            <!-- Selección del tipo de producto -->
+            <select 
+                id="tipoProductoEliminar" 
+                class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
+                    p-2 my-2 focus:bg-white" 
+                name="tipoProducto" 
+                required    
+            >   
+                <option value="" disabled selected>Seleccionar Tipo de Producto</option>
+                {{#each tiposProductos}}
+                    <option 
+                        value="{{tipo_producto}}" 
+                        {{#ifCond ../product.tipoProducto tipo_producto}}selected{{/ifCond}}
+                    >
+                        {{tipo_producto}}
+                    </option>
+                {{/each}}
+            </select>
+            <!-- Botón para Eliminar tipo de producto -->
+            <button 
+                type="button" 
+                id="eliminarTipoProductoButton" 
+                class="rounded-md bg-gray-500 w-full text-lg text-white font-semibold p-2 my-3 hover:bg-gray-500 focus:bg-gray-700"
+            >
+                Eliminar tipo de producto
+            </button>
         </div>
     </div>
 
@@ -153,6 +193,8 @@
         document.getElementById('labelSinCaracteristicas').classList.add('hidden');
         //Mostrar el select para agregar caracteristicas
         document.getElementById('caracteristicasSelect').classList.remove('hidden');
+        //Mostrar el select para agregar caracteristicas
+        document.getElementById('actualizarCaracteristicasProductoButton').classList.remove('hidden');
 
         const tipoProducto = this.value;
 
@@ -166,22 +208,21 @@
 
                     // Agregar características al contenedor
                     caracteristicas.forEach((caracteristica) => {
-                        console.log(caracteristica);
-                        agregarCaracteristica(caracteristica, container);
+                        console.log(caracteristicas);
+                        agregarCaracteristica(caracteristica, container, caracteristicas);
                     });
                 })
                 .catch(error => console.error('Error al obtener las características:', error));
         }
     });
 
-
-   function agregarCaracteristica(caracteristica, container) {
-    
+    // Función para agregar una nueva característica al contenedor
+    function agregarCaracteristica(caracteristica, container, caracteristicas) {
         const div = document.createElement('div'); 
         div.classList.add('flex', 'items-center', 'space-x-4', 'my-4');
 
         const divLabels = document.createElement('div');
-        divLabels.classList.add('flex', 'items-center', 'px-5', 'gap-11', 'my-4');
+        divLabels.classList.add('flex', 'items-center', 'px-5', 'gap-20', 'my-4');
 
         // Tipo de dato select
         const tipoDatoSelect = document.createElement('select');
@@ -207,20 +248,20 @@
                 <option value="No">No</option>
             `;
             campoDinamico.value = caracteristica.valor;
-            campoDinamico.required =  true;
+            campoDinamico.required = true;
         } else {
             campoDinamico = document.createElement('input');
             campoDinamico.type = caracteristica.tipoDato || 'text';
             campoDinamico.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'focus:bg-white', 'w-1/2', 'min-w-[180px]', 'h-12');
             campoDinamico.placeholder = `Ingrese ${caracteristica.nombre}`;
-            campoDinamico.required = true
+            campoDinamico.required = true;
         }
 
         // Checkbox para opcional
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.classList.add('w-6', 'h-6');
-        checkbox.checked = caracteristica.opcional;
+        checkbox.checked = true;
 
         const labelCheckbox = document.createElement('label');
         labelCheckbox.textContent = 'Opcional';
@@ -249,6 +290,27 @@
         }
         divLabels.appendChild(labelCaracteristica);
 
+        // Deshabilitar elementos si el nombre de la característica es "Modelo", "Serie" o "Precio (MXN)"
+        const nombresOcultos = ["Modelo", "Serie", "Precio (MXN)"];
+        if (nombresOcultos.includes(caracteristica.nombre)) {
+            tipoDatoSelect.disabled = true;
+            buttonEliminar.style.visibility = 'hidden';
+            checkbox.disabled = true;
+            checkbox.checked = false;
+            labelCheckbox.disabled = true;
+            labelTipoDato.disabled = true;
+        }
+
+        // Deshabilitar elementos si el nombre de la característica es "Modelo", "Serie" o "Precio (MXN)"
+        if (nombresOcultos.includes(caracteristica)) {
+            tipoDatoSelect.disabled = true;
+            checkbox.disabled = true;
+            labelCheckbox.disabled = true;
+            labelTipoDato.disabled = true;
+            campoDinamico.disabled = true;
+            campoDinamico.placeholder = 'Este campo no puede ser repetido';
+
+        }
 
         // Agregar elementos al div principal
         div.appendChild(tipoDatoSelect);
@@ -288,37 +350,52 @@
         });
     }
 
-
-    document.addEventListener('DOMContentLoaded', async () => {
+    // Función para actualizar el select de características
+    async function actualizarSelectCaracteristicas() {
         const selectElement = document.getElementById('caracteristicasSelect');
-        const container = document.getElementById('caracteristicas-container');
+        const selectElementEliminar = document.getElementById('eliminarCaracteristicasSelect');
+        const nombresOcultos = ["Modelo", "Serie", "Precio (MXN)"];
 
-        // Cargar las opciones del select desde el servidor una sola vez cuando la página se carga
         try {
-            const response = await fetch('/caracteristicas'); // Obtener las características disponibles
-
+            const response = await fetch('/caracteristicas');
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
             const data = await response.json();
 
             if (Array.isArray(data)) {
+                // Limpiar las opciones existentes en ambos selectores
+                selectElement.innerHTML = '<option value="">Agregar característica</option>';
+                selectElementEliminar.innerHTML = '<option value="">Eliminar característica</option>';
+
+                // Agregar las nuevas opciones
                 data.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item.caracteristica;
-                    option.textContent = item.caracteristica;
-                    selectElement.appendChild(option);
+                    if (!nombresOcultos.includes(item.nombre)) {
+                        const option = document.createElement('option');
+                        option.value = item.nombre;
+                        option.textContent = item.nombre;
+
+                        // Agregar opción a ambos selectores
+                        selectElement.appendChild(option);
+                        selectElementEliminar.appendChild(option.cloneNode(true));
+                    }
                 });
             } else {
                 throw new Error('El formato de los datos no es válido.');
             }
         } catch (error) {
-            // Muestra el error en el div
-            console.error('Error al llenar el select:', error);
+            console.error('Error al actualizar el select:', error);
         }
+    }
 
+    // Cargar las características del producto dinámicamente desde la nueva ruta
+    document.addEventListener('DOMContentLoaded', async () => {
+        const selectElement = document.getElementById('caracteristicasSelect');
+        const container = document.getElementById('caracteristicas-container');
+        actualizarSelectCaracteristicas();
         // Evento para agregar una nueva característica al seleccionar una opción
         selectElement.addEventListener('change', (event) => {
             const selectedCaracteristica = event.target.value;
+            console.log('Característica seleccionada:');
             console.log(selectedCaracteristica)
 
             // Verificar que se haya seleccionado una opción válida
@@ -329,10 +406,8 @@
         });
     });
 
-
     // Evento para el segundo contenedor (Agregar nuevo tipo de producto)
     document.getElementById('nuevoTipoProductoForm').addEventListener('submit', async function(event) {
-        event.preventDefault(); // Evita recargar la página
 
         const tipoProducto = document.getElementById('nuevoTipoProductoInput').value.trim();
         if (!tipoProducto) {
@@ -359,38 +434,8 @@
         }
     });
 
-    async function actualizarSelectCaracteristicas() {
-        const selectElement = document.getElementById('caracteristicasSelect');
-
-        try {
-            const response = await fetch('/caracteristicas');
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-            const data = await response.json();
-
-            if (Array.isArray(data)) {
-                // Limpiar las opciones existentes
-                selectElement.innerHTML = '<option value="">Agregar característica</option>';
-
-                // Agregar las nuevas opciones
-                data.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item.caracteristica;
-                    option.textContent = item.caracteristica;
-                    selectElement.appendChild(option);
-                });
-            } else {
-                throw new Error('El formato de los datos no es válido.');
-            }
-        } catch (error) {
-            console.error('Error al actualizar el select:', error);
-        }
-    }
-
-
     // Evento para el primer contenedor (Crear nueva característica)
     document.getElementById('agregarCaracteristicaButton').addEventListener('click', async function(event) {
-        event.preventDefault(); // Evita recargar la página
 
         const nombreCaracteristica = document.getElementById('nuevaCaracteristicaInput').value.trim();
         if (!nombreCaracteristica) {
@@ -424,8 +469,80 @@
             alert("Ocurrió un error al agregar la característica.");
         }
     });
+    
+    // Evento para el segundo contenedor (Eliminar tipo de producto)
+    document.getElementById('eliminarTipoProductoButton').addEventListener('click', async () => {
+        const selectElement = document.getElementById('tipoProductoEliminar');
+        console.log(selectElement);
+        const tipoProducto = selectElement.value;
+        
 
+        if (!tipoProducto) {
+            alert('Por favor, selecciona un tipo de producto.');
+            return;
+        }
 
+        try {
+            const response = await fetch(`/eliminarTipoProducto/${encodeURIComponent(tipoProducto)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ tipoProducto }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                // Aquí puedes agregar lógica para actualizar la interfaz, como eliminar la opción del select
+                selectElement.querySelector(`option[value="${tipoProducto}"]`).remove();
+                window.location.reload(); // Recargar la página
+            } else {
+                alert(data.error || 'Error al eliminar el tipo de producto.');
+            }
+        } catch (error) {
+            console.error('Error al eliminar el tipo de producto:', error);
+            alert('Hubo un problema al procesar tu solicitud.');
+        }
+    });
+
+    // Evento para el segundo contenedor (Eliminar características del tipo de producto)
+    document.getElementById('eliminarCaracteristicaButton').addEventListener('click', async () => {
+        const selectElement = document.getElementById('eliminarCaracteristicasSelect');
+        const nombreCaracteristica = selectElement.value;
+
+        if (!nombreCaracteristica) {
+            alert('Por favor, selecciona una característica para eliminar.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/eliminarCaracteristica/${encodeURIComponent(nombreCaracteristica)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ nombreCaracteristica }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.mensaje);
+                // Actualizar la lista de características eliminando la seleccionada
+                //selectElement.querySelector(`option[value="${nombreCaracteristica}"]`).remove();
+                actualizarSelectCaracteristicas();
+            } else {
+                alert(data.mensaje || 'Error al eliminar la característica.');
+            }
+        } catch (error) {
+            console.error('Error al eliminar la característica:', error);
+            alert('Hubo un problema al procesar tu solicitud.');
+        }
+    });
+
+    // Evento para el formulario principal (Crear Producto)
     document.querySelector('form').addEventListener('submit', async (event) => {
         event.preventDefault(); // Evita recargar la página
 
@@ -474,14 +591,17 @@
                 },
                 body: JSON.stringify(producto),
             });
-
+            // En caso de que la respuesta sea exitosa mostrar un mensaje
             if (response.ok) {
                 const data = await response.json();
                 alert('Producto creado exitosamente');
                 console.log(data);
+                window.location.href = '/verProducto'; // Redirigir después de mostrar el alert
+            // En caso de que la respuesta no sea exitosa mostrar un mensaje de error
             } else {
                 alert('Error al crear el producto');
             }
+            // En caso de que haya un error en la petición mostrar un mensaje
         } catch (error) {
             console.error('Error:', error);
             alert('Error al enviar los datos');

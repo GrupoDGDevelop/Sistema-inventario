@@ -182,117 +182,133 @@
     document.addEventListener('DOMContentLoaded', cargarProducto);
 
 
-   function agregarCaracteristica(caracteristica, container) {
-    
-        const div = document.createElement('div'); 
-        div.classList.add('flex', 'items-center', 'space-x-4', 'my-4');
+function agregarCaracteristica(caracteristica, container) {
+    const div = document.createElement('div'); 
+    div.classList.add('flex', 'items-center', 'space-x-4', 'my-4');
 
-        const divLabels = document.createElement('div');
-        divLabels.classList.add('flex', 'items-center', 'px-5', 'gap-11', 'my-4');
+    const divLabels = document.createElement('div');
+    divLabels.classList.add('flex', 'items-center', 'px-5', 'gap-11', 'my-4');
 
-        // Tipo de dato select
-        const tipoDatoSelect = document.createElement('select');
-        tipoDatoSelect.classList.add(
-            'border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2',
-            'text-lg', 'focus:bg-white', 'w-1/5', 'min-w-[150px]'
-        );
-        tipoDatoSelect.innerHTML = `
-            <option value="text" ${caracteristica.tipoDato === 'text' ? 'selected' : ''}>Texto</option>
-            <option value="number" ${caracteristica.tipoDato === 'number' ? 'selected' : ''}>Numérico</option>
-            <option value="boolean" ${caracteristica.tipoDato === 'boolean' ? 'selected' : ''}>Sí/No</option>
+    // Tipo de dato select
+    const tipoDatoSelect = document.createElement('select');
+    tipoDatoSelect.classList.add(
+        'border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2',
+        'text-lg', 'focus:bg-white', 'w-1/5', 'min-w-[150px]'
+    );
+    tipoDatoSelect.innerHTML = `
+        <option value="text" ${caracteristica.tipoDato === 'text' ? 'selected' : ''}>Texto</option>
+        <option value="number" ${caracteristica.tipoDato === 'number' ? 'selected' : ''}>Numérico</option>
+        <option value="boolean" ${caracteristica.tipoDato === 'boolean' ? 'selected' : ''}>Sí/No</option>
+    `;
+    tipoDatoSelect.name = 'tipoDatoSelect';
+
+    // Campo de entrada dinámico (input o select)
+    let campoDinamico;
+    if (caracteristica.tipoDato === 'boolean') {
+        campoDinamico = document.createElement('select');
+        campoDinamico.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'w-1/2');
+        campoDinamico.innerHTML = `
+            <option value="" disabled selected>Seleccione</option>
+            <option value="Sí">Sí</option>
+            <option value="No">No</option>
         `;
-        tipoDatoSelect.name = 'tipoDatoSelect';
+        campoDinamico.value = caracteristica.valor;
+    } else {
+        campoDinamico = document.createElement('input');
+        campoDinamico.type = caracteristica.tipoDato || 'text';
+        campoDinamico.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'focus:bg-white', 'w-1/2', 'min-w-[180px]', 'h-12');
+        if (caracteristica.tipoDato) {    
+            campoDinamico.value = caracteristica.valor
+        } else {
+            campoDinamico.placeholder = `Ingrese ${caracteristica}`;
+        }
+    }
 
-        // Campo de entrada dinámico (input o select)
-        let campoDinamico;
-        if (caracteristica.tipoDato === 'boolean') {
-            campoDinamico = document.createElement('select');
-            campoDinamico.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'w-1/2');
-            campoDinamico.innerHTML = `
+    // Checkbox para opcional
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.classList.add('w-6', 'h-6');
+    checkbox.checked = caracteristica.opcional;
+
+    const labelCheckbox = document.createElement('label');
+    labelCheckbox.textContent = 'Opcional';
+    labelCheckbox.classList.add('ml-2', 'text-lg');
+
+    // Botón de eliminar
+    const buttonEliminar = document.createElement('button');
+    buttonEliminar.className = 'p-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 focus:bg-gray-900';
+    buttonEliminar.textContent = 'Eliminar';
+    buttonEliminar.addEventListener('click', function () {
+        div.remove();
+        divLabels.remove();
+    });
+
+    // Crear el elemento label para "Tipo de dato"
+    let labelTipoDato = document.createElement('label');
+    labelTipoDato.textContent = 'Tipo de dato';
+    divLabels.appendChild(labelTipoDato);
+
+    // Crear el elemento label para la característica
+    let labelCaracteristica = document.createElement('label');
+    labelCaracteristica.textContent = caracteristica.nombre || caracteristica;
+    divLabels.appendChild(labelCaracteristica);
+
+    // Ocultar o deshabilitar elementos si la característica es "Modelo", "Serie" o "Precio (MXN)"
+    const nombresOcultos = ["Modelo", "Serie", "Precio (MXN)"];
+    if (nombresOcultos.includes(caracteristica.nombre)) {
+        tipoDatoSelect.disabled = true;
+        buttonEliminar.style.visibility = 'hidden';
+        checkbox.disabled = true;
+    }
+            // Deshabilitar elementos si el nombre de la característica es "Modelo", "Serie" o "Precio (MXN)"
+        if (nombresOcultos.includes(caracteristica)) {
+            tipoDatoSelect.disabled = true;
+            checkbox.disabled = true;
+            labelCheckbox.disabled = true;
+            labelTipoDato.disabled = true;
+            campoDinamico.disabled = true;
+            campoDinamico.placeholder = 'Este campo no puede ser repetido';
+        }
+
+
+    // Agregar elementos al div principal
+    div.appendChild(tipoDatoSelect);
+    div.appendChild(campoDinamico);
+    div.appendChild(buttonEliminar);
+    div.appendChild(checkbox);
+    div.appendChild(labelCheckbox);
+
+    // Agregar al contenedor general
+    container.appendChild(divLabels);
+    container.appendChild(div);
+
+    // Evento para cambiar dinámicamente el tipo de campo
+    tipoDatoSelect.addEventListener('change', function () {
+        const selectedType = this.value;
+
+        // Reemplazar el campo dinámico según el tipo seleccionado
+        const parentDiv = this.parentElement;
+        const currentField = parentDiv.querySelector('input, select:not([name="tipoDatoSelect"])');
+
+        if (selectedType === 'boolean') {
+            const comboBox = document.createElement('select');
+            comboBox.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'w-1/2');
+            comboBox.innerHTML = `
                 <option value="" disabled selected>Seleccione</option>
                 <option value="Sí">Sí</option>
                 <option value="No">No</option>
             `;
-            campoDinamico.value = caracteristica.valor;
+            parentDiv.replaceChild(comboBox, currentField);
         } else {
-            campoDinamico = document.createElement('input');
-            campoDinamico.type = caracteristica.tipoDato || 'text';
-            campoDinamico.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'focus:bg-white', 'w-1/2', 'min-w-[180px]', 'h-12');
-            campoDinamico.placeholder = `Ingrese ${caracteristica.nombre}`;
-            campoDinamico.value = caracteristica.valor;
+            const inputReplacement = document.createElement('input');
+            inputReplacement.type = selectedType;
+            inputReplacement.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'focus:bg-white', 'w-1/2', 'min-w-[180px]', 'h-12');
+            inputReplacement.placeholder = `Ingrese un valor`;
+            parentDiv.replaceChild(inputReplacement, currentField);
         }
+    });
+}
 
-        // Checkbox para opcional
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.classList.add('w-6', 'h-6');
-        checkbox.checked = caracteristica.opcional;
-
-        const labelCheckbox = document.createElement('label');
-        labelCheckbox.textContent = 'Opcional';
-        labelCheckbox.classList.add('ml-2', 'text-lg');
-
-        // Botón de eliminar
-        const buttonEliminar = document.createElement('button');
-        buttonEliminar.className = 'p-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 focus:bg-gray-900';
-        buttonEliminar.textContent = 'Eliminar';
-        buttonEliminar.addEventListener('click', function () {
-            div.remove();
-            divLabels.remove();
-        });
-
-        // Crear el elemento label para "Tipo de dato"
-        let labelTipoDato = document.createElement('label');
-        labelTipoDato.textContent = 'Tipo de dato';
-        divLabels.appendChild(labelTipoDato);
-
-        // Crear el elemento label para la caracteristica
-        let labelCaracteristica = document.createElement('label');
-        if (caracteristica.nombre) {
-            labelCaracteristica.textContent = caracteristica.nombre;
-        } else {
-            labelCaracteristica.textContent = caracteristica;
-        }
-        divLabels.appendChild(labelCaracteristica);
-
-
-        // Agregar elementos al div principal
-        div.appendChild(tipoDatoSelect);
-        div.appendChild(campoDinamico);
-        div.appendChild(buttonEliminar);
-        div.appendChild(checkbox);
-        div.appendChild(labelCheckbox);
-
-        // Agregar al contenedor general
-        container.appendChild(divLabels);
-        container.appendChild(div);
-
-        // Evento para cambiar dinámicamente el tipo de campo
-        tipoDatoSelect.addEventListener('change', function () {
-            const selectedType = this.value;
-
-            // Reemplazar el campo dinámico según el tipo seleccionado
-            const parentDiv = this.parentElement;
-            const currentField = parentDiv.querySelector('input, select:not([name="tipoDatoSelect"])');
-
-            if (selectedType === 'boolean') {
-                const comboBox = document.createElement('select');
-                comboBox.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'w-1/2');
-                comboBox.innerHTML = `
-                    <option value="" disabled selected>Seleccione</option>
-                    <option value="Sí">Sí</option>
-                    <option value="No">No</option>
-                `;
-                parentDiv.replaceChild(comboBox, currentField);
-            } else {
-                const inputReplacement = document.createElement('input');
-                inputReplacement.type = selectedType;
-                inputReplacement.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'focus:bg-white', 'w-1/2', 'min-w-[180px]', 'h-12');
-                inputReplacement.placeholder = `Ingrese un valor`;
-                parentDiv.replaceChild(inputReplacement, currentField);
-            }
-        });
-    }
 
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -310,8 +326,8 @@
             if (Array.isArray(data)) {
                 data.forEach(item => {
                     const option = document.createElement('option');
-                    option.value = item.caracteristica;
-                    option.textContent = item.caracteristica;
+                    option.value = item.nombre;
+                    option.textContent = item.nombre;
                     selectElement.appendChild(option);
                 });
             } else {

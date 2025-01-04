@@ -9,12 +9,12 @@
     <body class="bg-gray-100">
         <!-- Botón de retroceso -->
         <div class="mb-4">
-            <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-            <span class="ml-2">Regresar</span>
-            </button>
+            <a href="/" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span class="ml-2">Regresar</span>
+            </a>
         </div>
 
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
@@ -32,11 +32,15 @@
 
                     </div>
                     <div>
+                        <select id="tipoProductoSelect" class="border border-gray-300 rounded p-2">
+                            <option value="">Selecciona un producto</option>
+                            <!-- Opciones dinámicas se llenarán aquí -->
+                        </select>
                         <select id="productoSelect" class="border border-gray-300 rounded p-2">
                             <option value="">Selecciona un producto</option>
                             <!-- Opciones dinámicas se llenarán aquí -->
                         </select>
-                        <button id="addProductoBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                        <button id="addProductoBtn" type="button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
                             Agregar Producto
                         </button>
                     </div>
@@ -66,8 +70,8 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="font-semibold block mb-2">Software</label>
-                                <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Sistema" id="sistemaSelect" required>
-                                    <option value="" disabled selected>Seleccionar Sistema</option>
+                                <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Sistema" id="sistemaSelect">
+                                    <option value="" selected>Sin Software</option> <!-- Opción para 'Sin selección' -->
                                     {{#each sistemas}}
                                         <option value="{{ID_Sistemas}}">{{Nom_Software}}</option>
                                     {{/each}}
@@ -76,24 +80,25 @@
 
                             <div>
                                 <label class="font-semibold block mb-2">Licencia</label>
-                                <input type="text" name="Licencia" id="licenciaInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Licencia">
+                                <input type="text" name="Licencia" id="licenciaInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Licencia"  disabled>
                             </div>
 
                             <div>
                                 <label class="font-semibold block mb-2">Versión</label>
-                                <input type="text" name="Version" id="versionInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Versión">
+                                <input type="text" name="Version" id="versionInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Versión" disabled>
                             </div>
                         </div>
                     </div>
+
 
                     <!-- Datos de Área -->
                     <div class="bg-gray-200 p-4 rounded-md mb-6">
                         <h2 class="font-bold text-xl mb-4">Datos de Área</h2>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="font-semibold block mb-2">Departamento</label>
-                                <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Agencia" id="agenciaSelect">
-                                    <option value="" disabled selected>Seleccionar Departamento</option>
+                                <label class="font-semibold block mb-2">Agencia</label>
+                                <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Agencia" id="agenciaSelect" required>
+                                    <option value="" disabled selected>Seleccionar Agencia</option>
                                     {{#each agencias}}
                                         <option value="{{Id_Area}}">{{Nom_Agencia}}</option>
                                     {{/each}}
@@ -102,7 +107,7 @@
 
                             <div>
                                 <label class="font-semibold block mb-2">Num Agencia</label>
-                                <input type="text" name="Num_Agencia" id="numAgenciaInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Número de Agencia">
+                                <input type="text" name="Num_Agencia" id="numAgenciaInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Número de Agencia" disabled>
                             </div>
                             <div>
                                 <label class="font-semibold block mb-2">Departamento</label>
@@ -117,7 +122,7 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="font-semibold block mb-2">Nombre del Encargado</label>
-                                <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Usuario" id="usuarioSelect">
+                                <select class="border border-gray-300 rounded-md w-full p-2" name="Fk_Usuario" id="usuarioSelect" required>
                                     <option value="" disabled selected>Seleccionar Usuario</option>
                                     {{#each usuarios}}
                                         <option value="{{ID_Usuario}}">{{Nombre_U}}</option>
@@ -134,7 +139,7 @@
 
                             <div>
                                 <label class="font-semibold block mb-2">Resumen</label>
-                                <textarea name="Resumen" class="border border-gray-300 rounded-md w-full p-2" placeholder="Resumen" required></textarea>
+                                <textarea name="Resumen" class="border border-gray-300 rounded-md w-full p-2" placeholder="Resumen" ></textarea>
                             </div>
 
                             <div class="flex gap-4">
@@ -155,30 +160,53 @@
     // Obtener la fecha actual
     document.getElementById('FechaU').value = new Date().toISOString();
 
-    // Función para manejar cambios en los select y autocompletar los campos
+    // Variables para almacenar los productos y los tipos de producto
+    let productosPorTipo = {};
+
+    // Función para cargar los productos
+    async function cargarProductos() {
+        try {
+            const response = await fetch('/verProductos');
+            const data = await response.json();
+
+            if (response.ok) {
+                const productos = data.productos;
+
+                // Agrupar los productos por tipoProducto
+                productosPorTipo = productos.reduce((acc, producto) => {
+                    const tipo = producto.Nom_Producto; // tipoProducto
+                    if (!acc[tipo]) acc[tipo] = [];
+                    acc[tipo].push(producto);
+                    return acc;
+                }, {});
+
+                // Llenar el primer select con los tipos de producto
+                const tipoProductoSelect = document.getElementById('tipoProductoSelect');
+                tipoProductoSelect.innerHTML = '<option value="">Selecciona un tipo de producto</option>';
+                Object.keys(productosPorTipo).forEach(tipo => {
+                    const opcion = document.createElement('option');
+                    opcion.value = tipo;
+                    opcion.textContent = tipo;
+                    tipoProductoSelect.appendChild(opcion);
+                });
+
+                // Agregar el evento de cambio al primer select
+                tipoProductoSelect.addEventListener('change', actualizarProductos);
+            } else {
+                console.error('Error al cargar productos:', data.mensaje);
+            }
+        } catch (error) {
+            console.error('Error al conectar con el servidor:', error);
+        }
+    }
+
+        // Función para manejar cambios en los select y autocompletar los campos
     function cargarDatos(tipo, id, equipoItem) {
         fetch(`/crearCartaR/${tipo}/${id}`)
             .then(response => response.json())
             .then(data => {
                 if (data) {
                     switch(tipo) {
-                        case 'producto':
-                            // Seleccionar el campo de entrada del equipo dentro del bloque actual
-                            const modeloInput = equipoItem.querySelector('.modelo-input');
-                            const precioInput = equipoItem.querySelector('.precio-input');
-                            const caracteristicasTextarea = equipoItem.querySelector('.caracteristicas-textarea');
-                            const marcaSelect = equipoItem.querySelector('.marca-select');
-                            const proveedorSelect = equipoItem.querySelector('.proveedor-select');
-
-                            //Asignar el valor obtenido de los datos o dejarlo vacío si no existe
-                            modeloInput.value = data.modelo || '';
-                            precioInput.value = data.precio_total || '';
-                            caracteristicasTextarea.value = data.caracteristicas || '';
-
-                            // Actualizar opciones de Marca y Proveedor
-                            marcaSelect.innerHTML = `<option value="${data.marca_id}" selected>${data.marca}</option>`;
-                            proveedorSelect.innerHTML = `<option value="${data.proveedor_id}" selected>${data.proveedor}</option>`;
-                            break;
                         case 'sistema':
                             // Actualizar opciones de licencia y proveedor
                             document.getElementById('licenciaInput').value = data.licencia || '';
@@ -198,34 +226,23 @@
             })
             .catch(error => console.error(`Error al obtener los datos de ${tipo}:`, error));
     }
+    
+    // Función para actualizar los productos en el segundo select
+    function actualizarProductos() {
+        const tipoSeleccionado = document.getElementById('tipoProductoSelect').value;
+        const productoSelect = document.getElementById('productoSelect');
 
-    // Función para cargar los productos en el combo box
-    async function cargarProductos() {
-        try {
-            const response = await fetch('/verProductos'); // Ruta para obtener los productos
-            const data = await response.json();
+        // Limpiar el segundo select
+        productoSelect.innerHTML = '<option value="">Selecciona un producto</option>';
 
-            if (response.ok) {
-                const productos = data.productos;
-
-                // Obtener el combo box
-                const productoSelect = document.getElementById('productoSelect');
-
-                // Limpiar el combo box antes de llenarlo
-                productoSelect.innerHTML = '<option value="">Selecciona un producto</option>';
-
-                // Llenar el combo box con los productos
-                productos.forEach(producto => {
-                    const opcion = document.createElement('option');
-                    opcion.value = JSON.stringify(producto); // Guardar el producto completo como valor
-                    opcion.textContent = producto.Modelo;
-                    productoSelect.appendChild(opcion);
-                });
-            } else {
-                console.error('Error al cargar productos:', data.mensaje);
-            }
-        } catch (error) {
-            console.error('Error al conectar con el servidor:', error);
+        // Si hay un tipo seleccionado, mostrar sus productos
+        if (tipoSeleccionado && productosPorTipo[tipoSeleccionado]) {
+            productosPorTipo[tipoSeleccionado].forEach(producto => {
+                const opcion = document.createElement('option');
+                opcion.value = JSON.stringify(producto); // Guardar el producto completo como valor
+                opcion.textContent = producto.Modelo;
+                productoSelect.appendChild(opcion);
+            });
         }
     }
 
@@ -283,6 +300,160 @@
         // Asignar eventos
         document.getElementById('addProductoBtn').addEventListener('click', agregarProductoATabla);
 
+    // Crear una función para generar un sufijo aleatorio de 4 caracteres
+    function generarSufijoAleatorio() {
+        const caracteres = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let sufijo = '';
+        for (let i = 0; i < 4; i++) {
+            sufijo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+        }
+        return sufijo;
+    }
+
+
+    document.querySelector('form').addEventListener('submit', async (event) => {
+        event.preventDefault(); // Evita recargar la página
+
+        // Capturar los valores seleccionados del formulario
+        const resumen = document.querySelector('[name="Resumen"]').value;
+
+        // Capturar el valor de Fk_Sistema (texto en lugar de ID)
+        const sistemaSelect = document.querySelector('[name="Fk_Sistema"]');
+        const Fk_Sistema = sistemaSelect.options[sistemaSelect.selectedIndex]?.textContent.trim();
+
+        // Capturar los valores adicionales de Fk_Sistema
+        const licencia = document.querySelector('#licenciaInput').value.trim();
+        const version = document.querySelector('#versionInput').value.trim();
+
+        // Capturar el valor de Fk_Agencia (texto en lugar de ID)
+        const agenciaSelect = document.querySelector('[name="Fk_Agencia"]');
+        const Fk_Agencia = agenciaSelect.options[agenciaSelect.selectedIndex]?.textContent.trim();
+
+        // Capturar los valores adicionales de Fk_Agencia
+        const numAgencia = document.querySelector('#numAgenciaInput').value.trim();
+        const departamento = document.querySelector('#departamentoInput').value.trim();
+
+        // Capturar el valor de Fk_Usuario (texto en lugar de ID)
+        const usuarioSelect = document.querySelector('[name="Fk_Usuario"]');
+        const Fk_Usuario = usuarioSelect.options[usuarioSelect.selectedIndex]?.textContent.trim();
+
+        const fechaU = document.querySelector('#FechaU').value;
+
+        // Construir el array de productos desde la tabla
+        const productos = Array.from(document.querySelectorAll('tbody tr')).map(tr => {
+            const cells = tr.querySelectorAll('td');
+            return {
+                Nom_Producto: cells[0]?.textContent.trim(),
+                Modelo: cells[1]?.textContent.trim(),
+                Caracteristicas: cells[2]?.textContent.trim(),
+                Precio_Total: cells[3]?.textContent.trim(),
+                Nom_Marca: cells[4]?.textContent.trim(),
+                Nom_Proveedor: cells[5]?.textContent.trim()
+            };
+        });
+
+        // Validar que haya al menos un producto en la tabla
+        if (productos.length === 0) {
+            alert('Debe haber al menos un producto en la carta para poder crearse.');
+            return; // Detener el envío si no hay productos
+        }
+
+        // Crear un sufijo aleatorio
+        const departamentoAbreviado = departamento.substring(0, Math.min(4, departamento.length));
+        const nombreAgencia = Fk_Agencia.replace(/ /g, "_");; // Ya contiene el nombre de la agencia
+
+        // Generar el ID
+        const idCarta = `CR-${nombreAgencia}-${numAgencia}-${departamento}-${generarSufijoAleatorio()}`;
+
+        // Crear el objeto a enviar
+        const cartaResponsiva = {
+            Fk_Producto: productos, // Array de productos
+            Fk_Sistema: {
+                Nombre: Fk_Sistema,
+                Licencia: licencia,
+                Version: version
+            },  // Incluye los detalles adicionales
+            Fk_Agencia: {
+                Nombre: Fk_Agencia,
+                Num_Agencia: numAgencia,
+                Departamento: departamento
+            },  // Incluye los detalles adicionales
+            Fk_Usuario,  // Usando el nombre del usuario, no el ID
+            Resumen: resumen,
+            FechaU: fechaU,
+            id_CartaR:  idCarta
+        };
+
+            try {
+                // Hacer el POST al backend
+                const response = await fetch('/crearCartaR', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(cartaResponsiva),
+                });
+
+                if (response.ok) {
+                    const contentType = response.headers.get('Content-Type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json();
+                        alert('Carta responsiva creada exitosamente');
+                        setTimeout(() => {
+                            window.location.href = '/verCartaR'; // Redirigir a la vista
+                        }, 100); // Retraso de 0.1 segundos
+                        console.log(data);
+                    } else {
+                        alert('Carta responsiva creada exitosamente');
+                        setTimeout(() => {
+                            window.location.href = '/verCartaR'; // Redirigir a la vista
+                        }, 100); // Retraso de 0.1 segundos
+                        console.log(await response.text()); // Leer el texto (HTML)
+                    }
+                } else {
+                    alert('Error al crear la carta responsiva');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al enviar los datos');
+            }
+        });
+
+
+
+
+    // Agregar event listeners a cada select para llamar cargarDatos con el tipo adecuado
+    document.getElementById('productoSelect').addEventListener('change', function() {
+        cargarDatos('producto', this.value);
+    });
+    document.getElementById('sistemaSelect').addEventListener('change', function() {
+        // Obtener los campos de licencia y versión
+        const licenciaInput = document.getElementById('licenciaInput');
+        const versionInput = document.getElementById('versionInput');
+
+        // Verificar si el valor seleccionado es "Sin Software"
+        if (this.value === "") {
+            // Limpiar los campos de licencia y versión
+            licenciaInput.value = "";
+            versionInput.value = "";
+
+            // Deshabilitar los campos para evitar edición
+            licenciaInput.disabled = true;
+            versionInput.disabled = true;
+        } else {
+            // Habilitar los campos cuando se seleccione un software diferente
+            licenciaInput.disabled = false;
+            versionInput.disabled = false;
+            cargarDatos('sistema', this.value);
+        }
+    });
+    document.getElementById('agenciaSelect').addEventListener('change', function() {
+        cargarDatos('agencia', this.value);
+    });
+    document.getElementById('usuarioSelect').addEventListener('change', function() {
+        cargarDatos('usuario', this.value);
+    });
 
         </script>
     </body>

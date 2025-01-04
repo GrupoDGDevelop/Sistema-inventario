@@ -1,5 +1,6 @@
 require('dotenv').config();
 const myconection = require('express-myconnection');
+const mongoose = require('mongoose');
 
 
 module.exports = {

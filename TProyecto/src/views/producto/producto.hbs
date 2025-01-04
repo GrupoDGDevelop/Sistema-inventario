@@ -7,32 +7,77 @@
     </a>
 </div>
 
-    
+
   <body class="bg-gray-100">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
       <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-12 p-4">
         
-        <!-- Botón para añadir un nuevo producto -->
-        <div class="flex justify-between items-center mb-4">
+      <!-- Botón para añadir un nuevo producto -->
+      <div class="flex justify-between items-center mb-4">
           <a href="/crearProducto" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-            + Agregar
+              + Agregar
           </a>
+      </div>
 
-          <!-- Formulario de búsqueda -->
-          <form action="/verProducto/buscarP" method="POST" class="flex items-center">
-            <label for="search" class="text-gray-700 mr-2">Buscar:</label>
-            <input type="text" name="searchTerm" id="search" class="border rounded px-2 py-1" placeholder="Buscar...">
-            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-2 rounded">
-              Buscar
-            </button>
-          </form>
-        </div>
+      <!-- Formulario de búsqueda -->
+      <form action="/verProducto/buscarP" method="POST" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 border border-gray-300 rounded">
+          <!-- Filtro por tipo de producto -->
+          <div>
+              <label for="tipoProducto" class="text-gray-700 block mb-1">Tipo de producto:</label>
+              <select name="tipoProducto" id="tipoProducto" class="border rounded px-2 py-1 w-full">
+                  <option value="">Seleccione...</option>
+                  {{#each tiposProducto}}
+                  <option value="{{this}}">{{this}}</option>
+                  {{/each}}
+              </select>
+          </div>
+
+          <!-- Filtro por marca -->
+          <div>
+              <label for="marca" class="text-gray-700 block mb-1">Marca:</label>
+              <select name="marca" id="marca" class="border rounded px-2 py-1 w-full">
+                  <option value="">Seleccione...</option>
+                  {{#each marcas}}
+                  <option value="{{Nom_Marca}}">{{Nom_Marca}}</option>
+                  {{/each}}
+              </select>
+          </div>
+
+          <!-- Filtro por proveedor -->
+          <div>
+              <label for="proveedor" class="text-gray-700 block mb-1">Proveedor:</label>
+              <select name="proveedor" id="proveedor" class="border rounded px-2 py-1 w-full">
+                  <option value="">Seleccione...</option>
+                  {{#each proveedores}}
+                  <option value="{{Nom_Proveedor}}">{{Nom_Proveedor}}</option>
+                  {{/each}}
+              </select>
+          </div>
+
+          <!-- Filtro por número de serie -->
+          <div>
+              <label for="numSerie" class="text-gray-700 block mb-1">Num. de Serie:</label>
+              <input
+                  type="text"
+                  name="numSerie"
+                  placeholder="Buscar por número de serie"
+                  class="border border-gray-300 rounded px-2 py-1 text-sm w-full"
+              />
+          </div>
+
+          <!-- Botón de búsqueda -->
+          <div class="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4 flex justify-center">
+              <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                  Buscar
+              </button>
+          </div>
+      </form>
+
 
         <!-- Tabla de productos -->
         <table class="table-fixed w-full">
           <thead>
             <tr class="bg-gray-500 text-white">
-
               <th class="w-1/4 py-4">Tipo de producto</th>
               <th class="w-1/6 py-4">Modelo</th>
               <th class="w-1/6 py-4">Características</th>
@@ -43,67 +88,51 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Este tbody será llenado dinámicamente por JavaScript -->
+            {{#each productos}}
+            <tr class="bg-white border-b">
+              <!-- Tipo de producto -->
+              <td class="py-3 px-6">{{Nom_Producto}}</td>
+              <!-- Modelo del producto -->
+              <td class="p-3">{{Modelo}}</td>
+              <!-- Características -->
+              <td class="p-3">
+                {{#each Caracteristicas}}
+                  <p>{{this.nombre}}: {{this.valor}}</p>
+                {{/each}}
+              </td>
+              <!-- Precio Total -->
+              <td class="p-3">{{Precio_Total}}</td>
+              <!-- Marca del producto -->
+              <td class="p-3">{{Fk_Marca}}</td>
+              <!-- Proveedor del producto -->
+              <td class="p-3">{{Fk_Proveedor}}</td>
+              <!-- Acciones -->
+              <td class="p-3 flex justify-center">
+                <form action="/producto/eliminar" method="POST" class="mx-2">
+                  <input type="hidden" value="{{ID_Producto}}" name="id_P">
+                  <button class="bg-red-500 text-white px-3 py-1 rounded-sm" type="submit">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+                <a href="/producto/editarProducto/{{ID_Producto}}" class="bg-green-500 text-white px-3 py-1 rounded-sm">
+                  <i class="fas fa-pen"></i>
+                </a>
+              </td>
+            </tr>
+            {{/each}}
           </tbody>
         </table>
+
 
       </div>
     </div>
 
 <script>
-  // Función para cargar los productos desde el backend y rellenar la tabla
-  async function cargarProductos() {
-      try {
-          const response = await fetch('/verProductos'); // Ruta para obtener los productos
-          const data = await response.json();
-
-          if (response.ok) {
-              const productos = data.productos;
-
-              // Obtener el cuerpo de la tabla
-              const tbody = document.querySelector('tbody');
-              tbody.innerHTML = ''; // Limpiar contenido previo
-
-              // Iterar sobre los productos y crear filas dinámicamente
-              productos.forEach(producto => {
-                  const fila = document.createElement('tr');
-                  fila.classList.add('bg-white', 'border-b');
-
-                  // Crear columnas con los datos del producto
-                  fila.innerHTML = `
-
-                      <td class="p-3">${producto.Nom_Producto}</td>
-                      <td class="p-3">${producto.Modelo}</td>
-                      <td class="p-3">${producto.Caracteristicas}</td>
-                      <td class="p-3">${producto.Precio_Total}</td>
-                      <td class="p-3">${producto.Nom_Marca}</td>
-                      <td class="p-3">${producto.Nom_Proveedor}</td>
-                      <td class="p-3 flex justify-center">
-                          <form action="/producto/eliminar" method="POST" class="mx-2">
-                              <input type="hidden" value="${producto.ID_Producto}" name="id_P">
-                              <button class="bg-red-500 text-white px-3 py-1 rounded-sm" type="submit">
-                                  <i class="fas fa-trash"></i>
-                              </button>
-                          </form>
-                          <a href="/producto/editarProducto/${producto.ID_Producto}" class="bg-green-500 text-white px-3 py-1 rounded-sm">
-                              <i class="fas fa-pen"></i>
-                          </a>
-                      </td>
-                  `;
-
-                  // Agregar la fila al cuerpo de la tabla
-                  tbody.appendChild(fila);
-              });
-          } else {
-              console.error('Error al cargar productos:', data.mensaje);
-          }
-      } catch (error) {
-          console.error('Error al conectar con el servidor:', error);
-      }
-  }
 
   // Llamar a la función al cargar la página
-  window.onload = cargarProductos;
+  //window.onload = cargarProductos;
+
+  
 </script>
 
 

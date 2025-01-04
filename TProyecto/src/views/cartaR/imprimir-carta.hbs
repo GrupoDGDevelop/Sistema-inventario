@@ -18,17 +18,17 @@
     }
     .header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       display: flex;
       justify-content: center; /* Centra los logos en el espacio disponible */
       gap: 20px; /* Espacio entre los logos */
     }
     .header img {
-      height: 50px;
+      height: 40px;
       margin: 0; /* Elimina el margen adicional entre los logos */
     }
     .section {
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
     .section-title {
       font-weight: bold;
@@ -45,7 +45,12 @@
       border: 1px solid #ccc;
       padding: 5px;
       text-align: left;
+      width: auto; /* Asegura que las celdas ajusten su ancho */
     }
+    .expand {
+        width: 100%; /* Expande el input al 100% del ancho de la celda */
+        box-sizing: border-box; /* Incluye el padding y el borde dentro del ancho */
+      }
     .table th {
       background-color: #007bff;
       color: white;
@@ -105,23 +110,85 @@
         page-break-after: always; /* Fuerza un salto de página */
       }
     }
+  ol {
+    counter-reset: item;
+    list-style-type: none;
+    padding-left: 0;
+  }
+  li {
+    counter-increment: item;
+    margin-bottom: 0.5em;
+    position: relative;
+    padding-left: 3em; /* Espacio antes del texto */
+  }
+  li::before {
+    content: counter(item) ".";
+    position: absolute;
+    left: 0; /* Número alineado a la izquierda */
+    font-weight: bold;
+  }
   </style>
 </head>
 
 <body>
-      <!-- Botón de retroceso -->
-      <div class="mb-4 no-print">
-          <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700">
+  <!-- Botón de retroceso -->
+  <div class="mb-4 no-print">
+      <a href="/" class="text-gray-500 hover:text-gray-700">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
           <span class="ml-2">Regresar</span>
-          </button>
-      </div>
+      </a>
+  </div>
 
   <div class="container">
     <!-- Botón de Descargar -->
     <a href="#" class="btn-download no-print" onclick="printContent()">Imprimir</a>
+
+    
+  <!-- Segunda Hoja -->
+  <div class="container" style="font-size: 11.5px;"> <!-- Reducimos el tamaño de la letra -->
+    <p style="font-size: 8px;">{{carta.id_CartaR}}</p>
+    <div class="header">
+      <img src="/imagenes/grupoDG-logo.png" alt="Grupo Logo">
+      <img src="/imagenes/Volkswagen-logo.png" alt="VW Logo">
+      <img src="/imagenes/SEAT-logo.png" alt="SEAT Logo">
+      <img src="/imagenes/CUPRA-logo.png" alt="CUPRA Logo">
+    </div>
+
+    <!-- Texto de la carta responsiva -->
+    <div class="section">
+      <h2 class="section-title text-center px-20">CARTA RESPONSIVA</h2>
+      <p class="text-center"><strong>Política sobre el uso de programas, equipos y accesorios</strong></p>
+      <br>
+      <ol>
+        <li>Recibo <strong>{{#each carta.Fk_Producto}} {{Modelo}}, {{/each}}</strong> descrito(s) en esta responsiva, como herramienta(s) de trabajo.Manifestando que usaré, destinaré única y exclusivamente para el desempeño de mis funciones y actividades encomendadas por la empresa Grupo DG.</li>
+        <li contenteditable="true">Según las leyes de derechos de autor, las personas implicadas en la reproducción ilegal de software pueden ser demandadas por daños y perjuicios y enfrentar penas criminales, incluyendo multas y prisión. Grupo DG no permite la duplicación ilegal de software. Los empleados que realicen adquieran o usen copias no autorizadas de programas de computadoras será sancionados según las circunstancias. Esta conducta puede ser motivo de rescisión de contrato laboral.</li>
+        <li>Cualquier duda sobre si un empleado puede copiar instalar o usar un programa de computadora deberá ser preguntado al responsable del área de sistemas. En caso contrario la responsabilidad recae directamente sobre el empleado designado a dicho equipo de cómputo.</li>
+        <li>Todas las contraseñas otorgadas son confidenciales personales e intransferibles y es absoluta responsabilidad del empleado el buen o mal uso que se les dé, así mismo el equipo telefónico si es el caso que se otorgue, así como a su vez el uso del servicio de internet que se le otorgue con las restricciones para la realización de sus tareas diarias.</li>
+        <li>En el momento en que se me sea requerida por parte de Grupo DG, me comprometo a entregar a ésta el equipo de cómputo y software mencionados, en las mismas condiciones en que los recibo, sin más deterioro que el ocasionado por el uso normal y el transcurso del tiempo.</li>
+        <li>La información procesada por los usuarios con fines laborales es propiedad de Grupo DG y por tanto de carácter confidencial, el mal uso de dicha información como su publicación sustracción o desvío, será causa de sanciones que el gerente de área o el representante legal designen dependiendo el nivel de gravedad.</li>
+        <li>El empleado es conocedor de que el equipo de cómputo será auditado por el área de sistemas en cualquier instancia que se requiera para asegurar la integridad de la Empresa GrupoDG.</li>
+        <li>En caso de algún percance, ya sea robo, extravió, o que el equipo sufra algún derrame de líquido avisar primeramente al área de sistemas, para que ellos me comenten el proceso que se debe realizar.</li>
+      </ol>
+      <br>
+      <div  style="font-size: 11px;">
+        <p>
+        He recibido información sobre las políticas que Grupo DG. Dispone con respecto al uso del software y convengo en cumplirlas, así como la aceptación del Software instalado en el equipo de cómputo asignado para realizar mis tareas. Así mismo declaro me responsabilizo de las aplicaciones de Software sin licencia y previa autorización, deslindando a Grupo DG de toda acción legal que esto ocasione.  
+        </p>
+        <br>
+        <p>
+          Para el caso de terminación de la relación laboral por cualquier causa, o bien que me sea requerido el equipo en cualquier momento, me obligó a entregar inmediatamente el equipo asignado. Y en el evento de que dicho equipo no lo entregue en el momento que me sea requerido por la empresa, o entregándolo esté presente algún daño, ya sea intencional, o negligencia inexcusable, me obligo a cubrir el pago de los daños o perjuicios ocasionados, autorizando que me sea descontado de mi pago de salarios o bien me sea descontado de mi finiquito en caso de terminación de la relación laboral.
+        </p>
+        <br>
+        <p>
+          En virtud de lo anterior, desde ahora me hago sabedor del contenido de esta responsiva, por lo que me responsabilizo de las consecuencias por el mal uso, daño provocado o indebida disposición de los hardware descritos, comprometiéndome a pagar cualquier sanción, multa, daño o perjuicio ocasionado por mi negligencia o mala fe, obligándome a responder de ello ante la propia sociedad o ante cualquier tercero que en su caso resulte afectado.La presente responsiva la firmó de conformidad habiendo leído su contenido.
+        </p>
+      </div>
+    </div>
+
+  
+  <div class="page-break"></div>
 
     <!-- Encabezado -->
     <div class="header">
@@ -139,25 +206,24 @@
           <tr>
             <th>Producto</th>
             <th>Marca</th>
-            <th>Modelo</th>
             <th>Características</th>
-            <th>No. Serie</th>
             <th>Proveedor</th>
-            <th>Precio Total</th>
+            <th>Precio Total (MXN)</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>{{carta.Nom_Producto}}</td>
-            <td>{{carta.Nom_Marca}}</td>
-            <td>{{carta.Modelo}}</td>
-            <td>{{carta.Caracteristicas}}</td>
-            <td>{{carta.Num_Serie}}</td>
-            <td>{{carta.Nom_Proveedor}}</td>
-            <td>{{carta.Precio_Total}}</td>
-          </tr>
+          {{#each carta.Fk_Producto}}
+            <tr>
+              <td>{{Nom_Producto}}</td>
+              <td>{{Nom_Marca}}</td>
+              <td>{{Caracteristicas}}</td>
+              <td>{{Nom_Proveedor}}</td>
+              <td>${{Precio_Total}}</td>
+            </tr>
+          {{/each}}
         </tbody>
       </table>
+
     </div>
 
     <!-- Descripción del Software -->
@@ -173,9 +239,9 @@
         </thead>
         <tbody>
           <tr>
-            <td>{{carta.Nom_Software}}</td>
-            <td>{{carta.Version}}</td>
-            <td>{{carta.Licencia}}</td>
+            <td>{{carta.Fk_Sistema.Nombre}}</td>
+            <td>{{carta.Fk_Sistema.Version}}</td>
+            <td>{{carta.Fk_Sistema.Licencia}}</td>
           </tr>
         </tbody>
       </table>
@@ -194,9 +260,9 @@
         </thead>
         <tbody>
           <tr>
-            <td>{{carta.Nom_Agencia}}</td>
-            <td>{{carta.Num_Agencia}}</td>
-            <td>{{carta.Departamento}}</td>
+            <td>{{carta.Fk_Agencia.Nombre}}</td>
+            <td>{{carta.Fk_Agencia.Num_Agencia}}</td>
+            <td contenteditable="true">{{carta.Fk_Agencia.Departamento}}</td>
           </tr>
         </tbody>
       </table>
@@ -211,13 +277,36 @@
             <th>Nombre</th>
             <th>Puesto</th>
             <th>Firma</th>
+            <th>No. de Nomina</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>.</td>
-            <td>.</td>
-            <td>.</td>
+            <td>
+              <textarea
+                class="text-center border border-gray-300 rounded px-2 py-1 text-[12px] focus:outline-none focus:ring focus:ring-blue-300 resize-none overflow-hidden w-full"
+                placeholder="Escriba nombre del usuario"
+                oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+                rows="1"
+              ></textarea>
+            </td>
+            <td>
+              <textarea
+                class="text-center border border-gray-300 rounded px-2 py-1 text-[12px] focus:outline-none focus:ring focus:ring-blue-300 resize-none overflow-hidden w-full"
+                placeholder="Escriba nombre del puesto"
+                oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+                rows="1"
+              ></textarea>
+            </td>
+            <td> <br><br></td>
+            <td>
+              <textarea
+                class="text-center border border-gray-300 rounded px-2 py-1 text-[12px] focus:outline-none focus:ring focus:ring-blue-300 resize-none overflow-hidden w-full"
+                placeholder="Escriba nombre del No. Nomina"
+                oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+                rows="1"
+              ></textarea>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -225,65 +314,45 @@
 
     <!-- Firmas -->
     <div class="section">
-      <div class="section-title">Firma del Usuario</div>
       <div class="signature">
         <div>
-          <p>.</p>
+          <p><br></p>
+          <p><br></p>
+          <textarea
+            class="text-center border border-gray-300 rounded p-0 text-[12px] focus:outline-none focus:ring focus:ring-blue-300 resize-none overflow-hidden"
+            placeholder="Escriba nombre del Gerente"
+            oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+            rows="1"
+          ></textarea>
           <p>________________________</p>
           <p>Nombre y Firma de Gerente de Área</p>
         </div>
         <div>
-          <p>.</p>
+          <p><br></p>
+          <p><br></p>
+          <textarea
+            class="text-center border border-gray-300 rounded px-2 py-1 text-[12px] focus:outline-none focus:ring focus:ring-blue-300 resize-none overflow-hidden"
+            placeholder="Escriba nombre del Gerente"
+            oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+            rows="1"
+          ></textarea>
           <p>_________________________</p>
           <p>Nombre y Firma de Gerente Operativo o General</p>
         </div>
         <div>
-          <td>{{carta.Nombre_U}}</td>
+          <p><br></p>
+          <p><br></p>
+          <td>{{carta.Fk_Usuario}}</td>
           <p>_________________________</p>
           <p>Firma de Responsable de Sistemas</p>
         </div>
       </div>
+    </div> <!-- Cierre de la sección de firmas -->
     </div>
 
   </div>
 
-  <div class="page-break"></div>
-
-        <!-- Encabezado -->
-
-<!-- Segunda Hoja -->
-<div class="container" style="font-size: 12px;"> <!-- Reducimos el tamaño de la letra -->
-  <div class="header">
-    <img src="/imagenes/grupoDG-logo.png" alt="Grupo Logo">
-    <img src="/imagenes/Volkswagen-logo.png" alt="VW Logo">
-    <img src="/imagenes/SEAT-logo.png" alt="SEAT Logo">
-    <img src="/imagenes/CUPRA-logo.png" alt="CUPRA Logo">
-  </div>
-
-  <!-- Texto de la carta responsiva -->
-  <div class="section">
-    <h2 class="section-title">CARTA RESPONSIVA - {{carta.Nom_Producto}}</h2>
-    <p><strong>Política sobre el uso de programas, equipos y accesorios</strong></p>
-    <ol>
-      <li>1.  Recibo {{carta.Resumen}} con Software instalados descritos en esta responsiva, como herramienta de trabajo. Manifiesto darle un uso, destino único y exclusivamente para el desempeño de mis funciones y actividades encomendadas por la empresa Grupo DG. Según las leyes de derechos de autor, las personas implicadas en la reproducción ilegal de software pueden ser demandadas por daños y perjuicios y enfrentar penas criminales, incluyendo multas y prisión. Grupo DG no autoriza la reproducción de copias de software en ninguno de sus equipos, ni el uso de copias no autorizadas. El uso de programas de computadora será sancionado según las leyes aplicables y será motivo de rescisión de contrato laboral.</li>
-      <li>2.  Cualquier empleado que de forma indebida copie o instale un programa de computadora deberá ser responsable de cualquier daño al equipo de cómputo.</li>
-      <li>3.  Queda estrictamente prohibida la reproducción, copia, préstamo, transferencia o uso de software sin licencia o sin la debida autorización, así como el almacenamiento de material no autorizado en los equipos de cómputo del Grupo DG.</li>
-      <li>4.  Todas las contraseñas de acceso a las aplicaciones instaladas o transferidas es absoluta responsabilidad del empleado en el momento en que se le asigne. Esto también será extensivo si el caso de que surja algún daño o se alteren los datos que se encuentran en uso por otras áreas relacionadas o relacionadas con el trabajo asignado.</li>
-      <li>5.  En el momento en que se me asignen programas, equipos y accesorios por parte de Grupo DG, y por tratarse de equipo de cómputo y software mencionado, las mismas serán utilizadas única y exclusivamente con fines laborales.</li>
-      <li>6.  La información procesada por el uso de estos programas y equipos es propiedad de Grupo DG y por tanto deberá ser clasificada como “Confidencial”. Por tanto, está terminantemente prohibido el acceso, revisión, descarga, divulgación, distribución o cualquier otro uso de dicha información por parte de personal ajeno o fuera de la empresa Grupo DG.</li>
-      <li>7.  En caso de que Grupo DG lo considere necesario, se deberá permitir la revisión del equipo asignado, para determinar el correcto uso de los programas y equipos asignados por Grupo DG.</li>
-      <li>8.  Instancia alguna puede modificar los programas en licencia y autorización, asignados a los equipos de cualquier área de sistemas para uso exclusivo de empleados del Grupo DG.</li>
-    </ol>
-    <p>
-      He recibido información sobre las políticas que Grupo DG dispone con respecto al uso del software y sistemas que cumpla, así como la aceptación del Software instalado en el equipo de cómputo asignado para realizar mis tareas. Al igual, acepto las políticas de las aplicaciones de Software en licencia y previa autorización, asignadas a Grupo DG de todas las áreas designadas en esta ocasión.
-    </p>
-    <p>
-      Para el caso de terminación de la relación laboral por cualquier causa, o bien que se me requiera el equipo en cualquier momento, me obligo a entregar el equipo asignado. Y en el evento de que dicho equipo no se me entregue, se hará uso de mi consentimiento para la deducción de su valor por el salario o pago de nómina. De igual forma me obligo a la reparación del equipo si existe algún daño físico o de software que no sea resultado del uso del trabajo.
-    </p>
-  </div>
-</div>
-
-
+  </div> <!-- Cierre del contenedor principal con el tamaño de fuente -->
 
 </body>
   <script>

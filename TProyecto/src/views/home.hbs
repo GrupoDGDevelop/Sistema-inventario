@@ -18,12 +18,13 @@
     </div>
 
     <!-- Galería de cartas -->
+    
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {{#each cartas}}
-      <a href="/imprimirCartaPDF/{{ID_Carta_R}}" class="block border rounded-lg shadow-md bg-gray-100 hover:shadow-lg">
+      <a href="/imprimirCartaPDF/{{id_CartaR}}" class="block border rounded-lg shadow-md bg-gray-100 hover:shadow-lg">
         <div class="p-4">
           <div class="text-lg font-bold text-gray-700">
-            CR-{{ID_Carta_R}} <!-- ID de la Carta -->
+            {{id_CartaR}} <!-- ID de la Carta -->
           </div>
           <div class="text-sm text-gray-500">
             {{FechaU}} <!-- Fecha de creación -->

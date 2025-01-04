@@ -32,8 +32,12 @@
 
                     </div>
                     <div>
+                        <select id="tipoProductoSelect" class="border border-gray-300 rounded p-2">
+                            <option value="">Selecciona un producto</option>
+                            <!-- Opciones dinámicas se llenarán aquí -->
+                        </select>
                         <select id="productoSelect" class="border border-gray-300 rounded p-2">
-                            <option value="" disabled selected>Selecciona un producto</option>
+                            <option value="">Selecciona un producto</option>
                             <!-- Opciones dinámicas se llenarán aquí -->
                         </select>
                         <button id="addProductoBtn" type="button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
@@ -103,7 +107,7 @@
 
                             <div>
                                 <label class="font-semibold block mb-2">Num Agencia</label>
-                                <input type="text" name="Num_Agencia" id="numAgenciaInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Número de Agencia">
+                                <input type="text" name="Num_Agencia" id="numAgenciaInput" class="border border-gray-300 rounded-md w-full p-2" placeholder="Número de Agencia" disabled>
                             </div>
                             <div>
                                 <label class="font-semibold block mb-2">Departamento</label>
@@ -135,7 +139,7 @@
 
                             <div>
                                 <label class="font-semibold block mb-2">Resumen</label>
-                                <textarea name="Resumen" class="border border-gray-300 rounded-md w-full p-2" placeholder="Resumen" required></textarea>
+                                <textarea name="Resumen" class="border border-gray-300 rounded-md w-full p-2" placeholder="Resumen" ></textarea>
                             </div>
 
                             <div class="flex gap-4">
@@ -156,7 +160,47 @@
     // Obtener la fecha actual
     document.getElementById('FechaU').value = new Date().toISOString();
 
-    // Función para manejar cambios en los select y autocompletar los campos
+    // Variables para almacenar los productos y los tipos de producto
+    let productosPorTipo = {};
+
+    // Función para cargar los productos
+    async function cargarProductos() {
+        try {
+            const response = await fetch('/verProductos');
+            const data = await response.json();
+
+            if (response.ok) {
+                const productos = data.productos;
+
+                // Agrupar los productos por tipoProducto
+                productosPorTipo = productos.reduce((acc, producto) => {
+                    const tipo = producto.Nom_Producto; // tipoProducto
+                    if (!acc[tipo]) acc[tipo] = [];
+                    acc[tipo].push(producto);
+                    return acc;
+                }, {});
+
+                // Llenar el primer select con los tipos de producto
+                const tipoProductoSelect = document.getElementById('tipoProductoSelect');
+                tipoProductoSelect.innerHTML = '<option value="">Selecciona un tipo de producto</option>';
+                Object.keys(productosPorTipo).forEach(tipo => {
+                    const opcion = document.createElement('option');
+                    opcion.value = tipo;
+                    opcion.textContent = tipo;
+                    tipoProductoSelect.appendChild(opcion);
+                });
+
+                // Agregar el evento de cambio al primer select
+                tipoProductoSelect.addEventListener('change', actualizarProductos);
+            } else {
+                console.error('Error al cargar productos:', data.mensaje);
+            }
+        } catch (error) {
+            console.error('Error al conectar con el servidor:', error);
+        }
+    }
+
+        // Función para manejar cambios en los select y autocompletar los campos
     function cargarDatos(tipo, id, equipoItem) {
         fetch(`/crearCartaR/${tipo}/${id}`)
             .then(response => response.json())
@@ -182,34 +226,23 @@
             })
             .catch(error => console.error(`Error al obtener los datos de ${tipo}:`, error));
     }
+    
+    // Función para actualizar los productos en el segundo select
+    function actualizarProductos() {
+        const tipoSeleccionado = document.getElementById('tipoProductoSelect').value;
+        const productoSelect = document.getElementById('productoSelect');
 
-    // Función para cargar los productos en el combo box
-    async function cargarProductos() {
-        try {
-            const response = await fetch('/verProductos'); // Ruta para obtener los productos
-            const data = await response.json();
+        // Limpiar el segundo select
+        productoSelect.innerHTML = '<option value="">Selecciona un producto</option>';
 
-            if (response.ok) {
-                const productos = data.productos;
-
-                // Obtener el combo box
-                const productoSelect = document.getElementById('productoSelect');
-
-                // Limpiar el combo box antes de llenarlo
-                productoSelect.innerHTML = '<option value="">Selecciona un producto</option>';
-
-                // Llenar el combo box con los productos
-                productos.forEach(producto => {
-                    const opcion = document.createElement('option');
-                    opcion.value = JSON.stringify(producto); // Guardar el producto completo como valor
-                    opcion.textContent = producto.Modelo;
-                    productoSelect.appendChild(opcion);
-                });
-            } else {
-                console.error('Error al cargar productos:', data.mensaje);
-            }
-        } catch (error) {
-            console.error('Error al conectar con el servidor:', error);
+        // Si hay un tipo seleccionado, mostrar sus productos
+        if (tipoSeleccionado && productosPorTipo[tipoSeleccionado]) {
+            productosPorTipo[tipoSeleccionado].forEach(producto => {
+                const opcion = document.createElement('option');
+                opcion.value = JSON.stringify(producto); // Guardar el producto completo como valor
+                opcion.textContent = producto.Modelo;
+                productoSelect.appendChild(opcion);
+            });
         }
     }
 
@@ -332,24 +365,24 @@
         // Generar el ID
         const idCarta = `CR-${nombreAgencia}-${numAgencia}-${departamento}-${generarSufijoAleatorio()}`;
 
-            // Crear el objeto a enviar
-            const cartaResponsiva = {
-                Fk_Producto: productos, // Array de productos
-                Fk_Sistema: {
-                    Nombre: Fk_Sistema,
-                    Licencia: licencia,
-                    Version: version
-                },  // Incluye los detalles adicionales
-                Fk_Agencia: {
-                    Nombre: Fk_Agencia,
-                    Num_Agencia: numAgencia,
-                    Departamento: departamento
-                },  // Incluye los detalles adicionales
-                Fk_Usuario,  // Usando el nombre del usuario, no el ID
-                Resumen: resumen,
-                FechaU: fechaU,
-                id_CartaR:  idCarta
-            };
+        // Crear el objeto a enviar
+        const cartaResponsiva = {
+            Fk_Producto: productos, // Array de productos
+            Fk_Sistema: {
+                Nombre: Fk_Sistema,
+                Licencia: licencia,
+                Version: version
+            },  // Incluye los detalles adicionales
+            Fk_Agencia: {
+                Nombre: Fk_Agencia,
+                Num_Agencia: numAgencia,
+                Departamento: departamento
+            },  // Incluye los detalles adicionales
+            Fk_Usuario,  // Usando el nombre del usuario, no el ID
+            Resumen: resumen,
+            FechaU: fechaU,
+            id_CartaR:  idCarta
+        };
 
             try {
                 // Hacer el POST al backend

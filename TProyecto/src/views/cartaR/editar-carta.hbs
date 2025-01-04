@@ -19,8 +19,32 @@
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-12 p-6">
                 <h1 class="text-3xl font-bold mb-8">Editar Carta Responsiva</h1>
-
+                <!-- Formulario para actualizar la carta -->
                 <form action="/editarCarta/{{carta._id}}" method="POST" class="space-y-6">
+                
+                <!-- Select para el estado de la carta -->
+                <label>Estado de la carta: </label>
+                <select id="estadoCarta" class="border border-gray-300 rounded p-2">
+                    {{#ifCond carta.estado "Inactiva"}}
+                        <option value="Inactiva" selected>Inactiva</option>
+                    {{else}}
+                        <option value="Inactiva">Inactiva</option>
+                    {{/ifCond}}
+
+                    {{#ifCond carta.estado "Activa"}}
+                        <option value="Activa" selected>Activa</option>
+                    {{else}}
+                        <option value="Activa">Activa</option>
+                    {{/ifCond}}
+
+                    {{#ifCond carta.estado "Baja"}}
+                        <option value="Baja" selected>Baja</option>
+                    {{else}}
+                        <option value="Baja">Baja</option>
+                    {{/ifCond}}
+                </select>
+
+
                     
                     <!-- Contenedor de Equipos -->
                     <div id="equiposContainer">
@@ -30,6 +54,10 @@
                             <div class="grid grid-cols-3 gap-4">
                     </div>
                     <div>
+                        <select id="tipoProductoSelect" class="border border-gray-300 rounded p-2">
+                            <option value="">Selecciona un producto</option>
+                            <!-- Opciones dinámicas se llenarán aquí -->
+                        </select>
                         <select id="productoSelect" class="border border-gray-300 rounded p-2">
                             <option value="">Selecciona un producto</option>
                             <!-- Opciones dinámicas se llenarán aquí -->
@@ -66,6 +94,9 @@
                                     <button class="bg-red-500 text-white px-3 py-1 rounded-sm" onclick="eliminarFila(this)">
                                         <i class="fas fa-trash"></i>
                                     </button>
+                                    <a href="/producto/editarProducto/${producto.ID_Producto}" class="hidden bg-green-500 text-white px-3 py-1 rounded-sm" id="editarProducto" data-id="{{ID_Producto}}">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
                                 </td>
                             </tr>
                             {{/each}}
@@ -166,11 +197,52 @@
                                 <label class="font-semibold block mb-2">Resumen</label>
                                 <textarea name="Resumen" class="border border-gray-300 rounded-md w-full p-2" placeholder="Resumen" required>{{carta.Resumen}}</textarea>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="flex gap-4">
-                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Guardar</button>
+                    <p class="text-center"> (Puede almacenar el PDF de la carta en caso de que se encuentre activa/firmada) </p>
+
+                    <div class="flex justify-center items-center w-full">
+                        <!-- Área de Drag and Drop -->
+                        <div id="error-message" class="hidden text-red-500"></div>
+                                <div
+                                id="drop-area"
+                                class="border-2 border-dashed border-gray-400 p-8 w-full md:w-96 flex flex-col items-center justify-center space-y-4 rounded-lg"
+                                >
+                                <div class="text-center">
+                                    <!-- Icono y Texto para el área de Drag and Drop -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2v20m-9-9l9 9 9-9" />
+                                    </svg>
+                                    <p class="text-gray-500">Arrastra y suelta el archivo PDF aquí</p>
+                                    <p class="text-gray-500">o</p>
+                                    <button
+                                    type="button"
+                                    id="importar-btn"
+                                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                                    >
+                                    Importar archivo
+                                    </button>
+                                </div>
+                                <input type="file" id="file-input" class="hidden" accept="application/pdf" />
                             </div>
                         </div>
+                    <div id="file-info" class="mt-4 text-center text-gray-600"></div>
+                    <!-- Mostrar el PDF si está disponible -->
+                    <div class="mb-4 items-center">
+                        <h2 class="text-center text-xl font-medium mb-2">Vista previa del PDF</h2>
+                        <button type="button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded" id="botonBorrarPDF">Borrar PDF</button>
+                        {{#ifNotEmpty pdfBase64}}
+                            
+                            <iframe src="data:application/pdf;base64,{{pdfBase64}}" width="100%" height="600px"></iframe>
+                            <button></button>
+                        {{else}}
+                            <p class="text-center">No hay pdf disponible</p>
+                        {{/ifNotEmpty}}
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button type="submit" class=" bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Guardar</button>
                     </div>
 
                     <!-- Campo oculto para FechaU -->
@@ -182,33 +254,61 @@
 
 <script>
 
-    // Función para cargar los productos en el combo box
+    // Variables para almacenar los productos y los tipos de producto
+    let productosPorTipo = {};
+
+    // Función para cargar los productos
     async function cargarProductos() {
         try {
-            const response = await fetch('/verProductos'); // Ruta para obtener los productos
+            const response = await fetch('/verProductos');
             const data = await response.json();
 
             if (response.ok) {
                 const productos = data.productos;
 
-                // Obtener el combo box
-                const productoSelect = document.getElementById('productoSelect');
+                // Agrupar los productos por tipoProducto
+                productosPorTipo = productos.reduce((acc, producto) => {
+                    const tipo = producto.Nom_Producto; // tipoProducto
+                    if (!acc[tipo]) acc[tipo] = [];
+                    acc[tipo].push(producto);
+                    return acc;
+                }, {});
 
-                // Limpiar el combo box antes de llenarlo
-                productoSelect.innerHTML = '<option value="">Selecciona un producto</option>';
-
-                // Llenar el combo box con los productos
-                productos.forEach(producto => {
+                // Llenar el primer select con los tipos de producto
+                const tipoProductoSelect = document.getElementById('tipoProductoSelect');
+                tipoProductoSelect.innerHTML = '<option value="">Selecciona un tipo de producto</option>';
+                Object.keys(productosPorTipo).forEach(tipo => {
                     const opcion = document.createElement('option');
-                    opcion.value = JSON.stringify(producto); // Guardar el producto completo como valor
-                    opcion.textContent = producto.Modelo;
-                    productoSelect.appendChild(opcion);
+                    opcion.value = tipo;
+                    opcion.textContent = tipo;
+                    tipoProductoSelect.appendChild(opcion);
                 });
+
+                // Agregar el evento de cambio al primer select
+                tipoProductoSelect.addEventListener('change', actualizarProductos);
             } else {
                 console.error('Error al cargar productos:', data.mensaje);
             }
         } catch (error) {
             console.error('Error al conectar con el servidor:', error);
+        }
+    }
+    // Función para actualizar los productos en el segundo select
+    function actualizarProductos() {
+        const tipoSeleccionado = document.getElementById('tipoProductoSelect').value;
+        const productoSelect = document.getElementById('productoSelect');
+
+        // Limpiar el segundo select
+        productoSelect.innerHTML = '<option value="">Selecciona un producto</option>';
+
+        // Si hay un tipo seleccionado, mostrar sus productos
+        if (tipoSeleccionado && productosPorTipo[tipoSeleccionado]) {
+            productosPorTipo[tipoSeleccionado].forEach(producto => {
+                const opcion = document.createElement('option');
+                opcion.value = JSON.stringify(producto); // Guardar el producto completo como valor
+                opcion.textContent = producto.Modelo;
+                productoSelect.appendChild(opcion);
+            });
         }
     }
 
@@ -229,6 +329,8 @@
         const producto = JSON.parse(productoSeleccionado);
         const fila = document.createElement('tr');
         fila.classList.add('bg-white', 'border-b');
+
+        console.log(producto);
 
         fila.innerHTML = `
             <td class="p-3">${producto.Nom_Producto}</td>
@@ -265,6 +367,36 @@
 
         // Asignar eventos
         document.getElementById('addProductoBtn').addEventListener('click', agregarProductoATabla);
+    
+    // Event listener para el botón de editar producto
+    document.getElementById('editarProducto').addEventListener('click', async function (event) {
+        event.preventDefault(); // Evitar la navegación por defecto
+        const idProducto = this.getAttribute('data-id');
+        console.log('Editar producto:', idProducto);
+
+        try {
+            const response = await fetch(`/producto/editarProducto/${idProducto}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                if (response.status === 404) {
+                    alert("Producto no encontrado en la base de datos.");
+                } else {
+                    alert("Ocurrió un error al intentar cargar el producto.");
+                }
+                return;
+            }
+
+            // Redirigir al usuario a la página de edición si el producto existe
+            window.location.href = `/producto/editarProducto/${idProducto}`;
+        } catch (error) {
+            console.error("Error al verificar el producto:", error);
+            alert("Ocurrió un error inesperado. Por favor, inténtalo de nuevo.");
+        }
+    });
 
 
     // Función para manejar cambios en los select y autocompletar los campos
@@ -272,6 +404,7 @@
         fetch(`/crearCartaR/${tipo}/${id}`)
             .then(response => response.json())
             .then(data => {
+                // Obtener los campos de licencia y versión
                 if (data) {
                     switch(tipo) {
                         case 'sistema':
@@ -291,111 +424,169 @@
             .catch(error => console.error(`Error al obtener los datos de ${tipo}:`, error));
     }
 
-    document.querySelector('form').addEventListener('submit', async (event) => {
-    event.preventDefault(); // Evita recargar la página
-
-    // Capturar los valores seleccionados del formulario
-    const resumen = document.querySelector('[name="Resumen"]').value;
-
-    // Capturar el valor de Fk_Sistema (texto en lugar de ID)
-    const sistemaSelect = document.querySelector('[name="Fk_Sistema"]');
-    const Fk_Sistema = sistemaSelect.options[sistemaSelect.selectedIndex]?.textContent.trim();
-
-    // Capturar los valores adicionales de Fk_Sistema
-    const licencia = document.querySelector('#licenciaInput').value.trim();
-    const version = document.querySelector('#versionInput').value.trim();
-
-    // Capturar el valor de Fk_Agencia (texto en lugar de ID)
-    const agenciaSelect = document.querySelector('[name="Fk_Agencia"]');
-    const Fk_Agencia = agenciaSelect.options[agenciaSelect.selectedIndex]?.textContent.trim();
-
-    // Capturar los valores adicionales de Fk_Agencia
-    const numAgencia = document.querySelector('#numAgenciaInput').value.trim();
-    const departamento = document.querySelector('#departamentoInput').value.trim();
-
-    // Capturar el valor de Fk_Usuario (texto en lugar de ID)
-    const usuarioSelect = document.querySelector('[name="Fk_Usuario"]');
-    const Fk_Usuario = usuarioSelect.options[usuarioSelect.selectedIndex]?.textContent.trim();
-
-    const fechaU = document.querySelector('#FechaU').value;
-
-    // Construir el array de productos desde la tabla
-    const productos = Array.from(document.querySelectorAll('tbody tr')).map(tr => {
-        const cells = tr.querySelectorAll('td');
-        return {
-            Nom_Producto: cells[0]?.textContent.trim(),
-            Modelo: cells[1]?.textContent.trim(),
-            Caracteristicas: cells[2]?.textContent.trim(),
-            Precio_Total: cells[3]?.textContent.trim(),
-            Nom_Marca: cells[4]?.textContent.trim(),
-            Nom_Proveedor: cells[5]?.textContent.trim()
-        };
-    });
-
-    // Validar que haya al menos un producto en la tabla
-    if (productos.length === 0) {
-        alert('Debe haber al menos un producto en la carta para poder crearse.');
-        return; // Detener el envío si no hay productos
+    // Crear una función para generar un sufijo aleatorio de 4 caracteres
+    function generarSufijoAleatorio() {
+        const caracteres = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let sufijo = '';
+        for (let i = 0; i < 4; i++) {
+            sufijo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+        }
+        return sufijo;
     }
-
-
-    // Crear el objeto a enviar
-    const cartaResponsiva = {
-        Fk_Producto: productos, // Array de productos
-        Fk_Sistema: {
-            Nombre: Fk_Sistema,
-            Licencia: licencia,
-            Version: version
-        },  // Incluye los detalles adicionales
-        Fk_Agencia: {
-            Nombre: Fk_Agencia,
-            Num_Agencia: numAgencia,
-            Departamento: departamento
-        },  // Incluye los detalles adicionales
-        Fk_Usuario,  // Usando el nombre del usuario, no el ID
-        Resumen: resumen,
-    };
-
-    try {
-        // Hacer el POST al backend
-        const response = await fetch('/editarCarta/{{carta._id}}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(cartaResponsiva),
+    
+    // Función para convertir el archivo PDF a Base64
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                resolve(reader.result.split(',')[1]); // Devuelve solo la parte de Base64
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
         });
+    }
+    
+    // Event listener para el formulario
+    document.querySelector('form').addEventListener('submit', async (event) => {
+        event.preventDefault(); // Evita recargar la página
 
-        if (response.ok) {
-            const contentType = response.headers.get('Content-Type');
-            if (contentType && contentType.includes('application/json')) {
-                const data = await response.json();
-                alert('Carta responsiva actualizada exitosamente');
-                setTimeout(() => {
-                    window.location.href = '/verCartaR'; // Redirigir a la vista
-                }, 100); // Retraso de 0.1 segundos
-                console.log(data);
-            } else {
-                alert('Carta responsiva actualizada exitosamente');
-                setTimeout(() => {
-                    window.location.href = '/verCartaR'; // Redirigir a la vista
-                }, 100); // Retraso de 0.1 segundos
-                console.log(await response.text()); // Leer el texto (HTML)
+        // Capturar los valores seleccionados del formulario
+        const resumen = document.querySelector('[name="Resumen"]').value;
+
+        // Capturar el valor de Fk_Sistema (texto en lugar de ID)
+        const sistemaSelect = document.querySelector('[name="Fk_Sistema"]');
+        const Fk_Sistema = sistemaSelect.options[sistemaSelect.selectedIndex]?.textContent.trim();
+
+        // Capturar los valores adicionales de Fk_Sistema
+        const licencia = document.querySelector('#licenciaInput').value.trim();
+        const version = document.querySelector('#versionInput').value.trim();
+
+        // Capturar el valor de Fk_Agencia (texto en lugar de ID)
+        const agenciaSelect = document.querySelector('[name="Fk_Agencia"]');
+        const Fk_Agencia = agenciaSelect.options[agenciaSelect.selectedIndex]?.textContent.trim();
+
+        // Capturar los valores adicionales de Fk_Agencia
+        const numAgencia = document.querySelector('#numAgenciaInput').value.trim();
+        const departamento = document.querySelector('#departamentoInput').value.trim();
+
+        // Capturar el valor de Fk_Usuario (texto en lugar de ID)
+        const usuarioSelect = document.querySelector('[name="Fk_Usuario"]');
+        const Fk_Usuario = usuarioSelect.options[usuarioSelect.selectedIndex]?.textContent.trim();
+
+        const estadoCarta = document.querySelector('#estadoCarta').value;
+
+        //const fechaU = document.querySelector('#FechaU').value;
+
+        // Capturar el archivo PDF desde el input
+        const fileInput = document.querySelector('#file-input');
+        const file = fileInput.files[0];
+
+        // Si hay un archivo PDF, realizar las validaciones
+        if (file) {
+            // Validar el archivo
+            if (file.type !== 'application/pdf') {
+                alert("El archivo debe ser un PDF.");
+                return;
             }
-        } else {
-            alert('Error al crear la carta responsiva');
+            if (file.size > 16 * 1024 * 1024) {
+                alert("El archivo no puede superar los 16MB.");
+                return;
+            }
         }
 
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al enviar los datos');
-    }
-});
+        // Construir el array de productos desde la tabla
+        const productos = Array.from(document.querySelectorAll('tbody tr')).map(tr => {
+            const cells = tr.querySelectorAll('td');
+            return {
+                Nom_Producto: cells[0]?.textContent.trim(),
+                Modelo: cells[1]?.textContent.trim(),
+                Caracteristicas: cells[2]?.textContent.trim(),
+                Precio_Total: cells[3]?.textContent.trim(),
+                Nom_Marca: cells[4]?.textContent.trim(),
+                Nom_Proveedor: cells[5]?.textContent.trim()
+            };
+        });
+
+        if (productos.length === 0) {
+            alert('Debe haber al menos un producto en la carta para poder crearse.');
+            return;
+        }
+
+        // Crear un sufijo aleatorio
+        const departamentoAbreviado = departamento.substring(0, Math.min(4, departamento.length));
+        const nombreAgencia = Fk_Agencia.replace(/ /g, "_");; // Ya contiene el nombre de la agencia
+         // Generar el ID
+        const idCarta = `CR-${nombreAgencia}-${numAgencia}-${departamento}-${generarSufijoAleatorio()}`;
+
+        // Crear el objeto a enviar
+        const cartaResponsiva = {
+            Fk_Producto: productos, // Array de productos
+            Fk_Sistema: {
+                Nombre: Fk_Sistema,
+                Licencia: licencia,
+                Version: version
+            },  // Incluye los detalles adicionales
+            Fk_Agencia: {
+                Nombre: Fk_Agencia,
+                Num_Agencia: numAgencia,
+                Departamento: departamento
+            },  // Incluye los detalles adicionales
+            Fk_Usuario,  // Usando el nombre del usuario, no el ID
+            Resumen: resumen,
+            id_CartaR:  idCarta,
+            estado: estadoCarta
+        };
+
+        // Crear un FormData y agregar el archivo y los datos
+        const formData = new FormData();
+        
+        // Si el archivo existe, agregarlo al FormData
+        if (file) {
+            formData.append('PDF', file); // Agregar el archivo PDF
+        }
+        
+        formData.append('cartaResponsiva', JSON.stringify(cartaResponsiva)); // Agregar el JSON como texto
+        // Ver los valores del FormData
+        formData.forEach((value, key) => {
+            console.log(`${key}: ${value}`);
+        });
+        try {
+            const response = await fetch('/editarCarta/{{carta._id}}', {
+                method: 'POST',
+                body: formData // Enviar el FormData directamente
+            });
+
+            if (response.ok) {
+                const contentType = response.headers.get('Content-Type');
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    alert('Carta responsiva actualizada exitosamente');
+                    setTimeout(() => {
+                        window.location.href = '/verCartaR';
+                    }, 100);
+                    console.log(data);
+                } else {
+                    alert('Carta responsiva actualizada exitosamente');
+                    setTimeout(() => {
+                        window.location.href = '/verCartaR';
+                    }, 100);
+                    console.log(await response.text());
+                }
+            } else {
+                alert('Error al crear la carta responsiva');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al enviar los datos');
+        }
+    });
 
     // Agregar event listeners a cada select para llamar cargarDatos con el tipo adecuado
     document.getElementById('productoSelect').addEventListener('change', function() {
         cargarDatos('producto', this.value);
     });
+
+    // Event listener para el select de sistema
     document.getElementById('sistemaSelect').addEventListener('change', function() {
         // Obtener los campos de licencia y versión
         const licenciaInput = document.getElementById('licenciaInput');
@@ -417,12 +608,151 @@
             cargarDatos('sistema', this.value);
         }
     });
+
+    // Event listener para el select de agencia
     document.getElementById('agenciaSelect').addEventListener('change', function() {
         cargarDatos('agencia', this.value);
     });
+
+    // Event listener para el select de usuario
     document.getElementById('usuarioSelect').addEventListener('change', function() {
         cargarDatos('usuario', this.value);
     });
+    
+    // Event listener para el botón de importar archivo
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file-input');
+    const importarBtn = document.getElementById('importar-btn');
+    const submitBtn = document.querySelector('form button[type="submit"]'); // Suponiendo que es el botón de envío
+    const fileInfo = document.getElementById('file-info');
+    const errorMessage = document.getElementById('error-message');
+
+    // Variable para almacenar el archivo seleccionado
+    let uploadedFile = null;
+
+    // Función para validar el archivo
+    const validateFile = (file, existingPdfBase64) => {
+        if (file.type !== 'application/pdf') {
+            errorMessage.textContent = '¡Error! Solo se pueden cargar archivos PDF.';
+            errorMessage.classList.remove('hidden');
+            return false;
+        }
+        
+        if (file.size > 16 * 1024 * 1024) { // 16MB
+            errorMessage.textContent = '¡Error! El archivo excede el tamaño máximo de 16MB.';
+            errorMessage.classList.remove('hidden');
+            return false;
+        }
+
+        errorMessage.classList.add('hidden');
+
+        // Leer el contenido del archivo y convertirlo a Base64
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const uploadedPdfBase64 = event.target.result.split(',')[1]; // Extrae el contenido Base64
+
+            // Compara el Base64 del archivo con el existente
+            if (existingPdfBase64 && uploadedPdfBase64 === existingPdfBase64) {
+                alert('Este archivo ya está registrado.');
+                return false;
+            }
+
+            // Si ya existe un archivo diferente, mostrar confirmación
+            if (existingPdfBase64) {
+                const replaceConfirmed = window.confirm('Ya hay una carta registrada. ¿Está seguro de querer reemplazarla?');
+                if (!replaceConfirmed) {
+                    return false;
+                }
+            }
+
+            // Aquí podrías continuar con el procesamiento del archivo
+            console.log('Archivo válido y listo para cargar.');
+            return true;
+        };
+
+        reader.readAsDataURL(file); // Convierte el archivo a Base64
+        return true; // Retorna inicialmente para evitar bloqueos del flujo, pero asegura validar con la lógica del FileReader.
+    };
+
+    // Función para manejar el arrastre y caída de archivos
+    const handleFileUpload = (file) => {
+        if (validateFile(file, '{{pdfBase64}}')) {
+            uploadedFile = file; // Guardar el archivo en una variable global
+            fileInfo.textContent = `Archivo cargado: ${file.name}`;
+            
+            // Habilitar el botón de envío después de cargar el archivo correctamente
+            submitBtn.disabled = false;
+        }
+    };
+
+    document.getElementById('botonBorrarPDF').addEventListener('click', async function () {
+        // Preguntar al usuario si está seguro de querer borrar el PDF
+        const confirmarEliminacion = window.confirm('¿Estás seguro de querer borrar el PDF? Esta acción no se puede deshacer.');
+
+        if (confirmarEliminacion) {
+            try {
+
+                // Realiza la solicitud de eliminación del PDF
+                const response = await fetch(`/eliminarCartaPDF/{{carta._id}}`, {
+                    method: 'POST', // Método POST para eliminar
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(data.mensaje); // Mostrar mensaje de éxito
+                    window.location.reload(); // Recargar la página para ver los cambios
+                } else {
+                    alert(data.mensaje || 'Hubo un problema al eliminar el PDF.');
+                }
+            } catch (error) {
+                console.error('Error al intentar eliminar el PDF:', error);
+                alert('Error al intentar eliminar el PDF.');
+            }
+        } else {
+            // Si el usuario no confirma, no hacer nada
+            console.log('Eliminación cancelada.');
+        }
+    });
+
+
+    // Evento de "arrastrar y soltar"
+    dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropArea.classList.add('bg-gray-100');
+    });
+
+    // Evento de "arrastrar y soltar" al soltar el archivo
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.classList.remove('bg-gray-100');
+    });
+
+    // Evento de "arrastrar y soltar" al soltar el archivo
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('bg-gray-100');
+        
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            handleFileUpload(file);
+        }
+    });
+
+    // Evento de seleccionar archivo con el botón
+    importarBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+    // Evento de seleccionar archivo con el input
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (file) {
+            handleFileUpload(file);
+        }
+    });
+
 </script>
 </body>
 </html>

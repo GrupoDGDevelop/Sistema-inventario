@@ -7,15 +7,39 @@ function verCarta(req, res) {
     const db = mongoose.connection; // Obtener la conexión de mongoose
     const collection = db.collection('cartas_responsivas'); // Acceder a la colección 'cartas_responsivas'
 
+    // Obtener todas las cartas
     collection.find({}).toArray()
         .then(cartas => {
             if (!cartas) {
                 return res.status(404).json({ message: 'No se encontraron cartas responsivas.' });
             }
 
-            // Renderizar la vista y pasar las cartas
-            res.render('cartaR/ver-carta', { cartas });
-            
+            // Obtener valores únicos de proveedores, agencias, usuarios y números de agencia
+            const proveedoresPromise = collection.distinct('Fk_Producto.Nom_Proveedor');
+            const agenciasPromise = collection.distinct('Fk_Agencia.Nombre');
+            const usuariosPromise = collection.distinct('Fk_Usuario');
+            const numerosAgenciaPromise = collection.distinct('Fk_Agencia.Num_Agencia');
+            const estadopPromise = collection.distinct('estado');
+            const tienePDFsPromise = collection.distinct('tienePDF');
+
+            // Ejecutar todas las promesas para obtener los valores únicos
+            Promise.all([proveedoresPromise, agenciasPromise, usuariosPromise, numerosAgenciaPromise, estadopPromise, tienePDFsPromise])
+                .then(([proveedores, agencias, usuarios, numerosAgencia, estados, tienePDFs]) => {
+                    // Renderizar la vista y pasar las cartas, proveedores, agencias, usuarios y números de agencia
+                    res.render('cartaR/ver-carta', {
+                        cartas,
+                        proveedores,
+                        agencias,
+                        usuarios,
+                        numerosAgencia,
+                        estados,
+                        tienePDFs
+                    });
+                })
+                .catch(err => {
+                    console.error('Error al obtener valores únicos:', err);
+                    res.status(500).json({ message: 'Error al obtener valores únicos', error: err });
+                });
         })
         .catch(err => {
             console.error('Error al obtener cartas responsivas:', err);
@@ -24,43 +48,89 @@ function verCarta(req, res) {
 }
 
 
-// Buscar cartas por un término específico (Resumen)
+// Buscar cartas con filtros específicos y coincidencias parciales para idCarta
 function buscarCarta(req, res) {
-    const searchTerm = req.body.searchTerm; // Obtén el término de búsqueda desde el formulario
+    const db = mongoose.connection; // Conexión a MongoDB
+    const collection = db.collection('cartas_responsivas'); // Colección de cartas
 
-    req.getConnection((err, conn) => {
-        if (err) {
-            console.error('Error de conexión:', err);
-            return res.status(500).send('Error de conexión a la base de datos');
+    // Obtener los filtros enviados desde el formulario
+    const { idCarta, numeroAgencia, agencia, usuario, startDate, endDate, estado, tienePDF } = req.body;
+
+    // Construir la consulta dinámica
+    const query = {};
+
+    if (idCarta && idCarta.trim() !== "") {
+        query.id_CartaR = { $regex: idCarta, $options: "i" }; // Búsqueda parcial (insensible a mayúsculas/minúsculas)
+    }
+
+    if (numeroAgencia && numeroAgencia.trim() !== "") {
+        query["Fk_Agencia.Num_Agencia"] = numeroAgencia; // Búsqueda exacta por número de agencia
+    }
+
+    if (agencia && agencia.trim() !== "") {
+        query["Fk_Agencia.Nombre"] = agencia; // Búsqueda exacta por nombre de agencia
+    }
+
+    if (usuario && usuario.trim() !== "") {
+        query.Fk_Usuario = usuario; // Búsqueda exacta por usuario
+    }
+
+    if (startDate || endDate) {
+        query.FechaU = {};
+        if (startDate) {
+            query.FechaU.$gte = new Date(startDate); // Fecha desde
         }
+        if (endDate) {
+            query.FechaU.$lte = new Date(endDate); // Fecha hasta
+        }
+    }
 
-        // Ajustamos la consulta para buscar coincidencias parciales en el campo "Resumen"
-        const query = `
-            SELECT 
-                carta_r.*,
-                producto.Nom_Producto,
-                sistemas.Nom_Software,
-                agencia.Nom_Agencia,
-                usuario.Nombre_U
-            FROM 
-                carta_r 
-            JOIN producto ON carta_r.Fk_Producto = producto.ID_Producto
-            JOIN sistemas ON carta_r.Fk_Sistema = sistemas.ID_Sistemas
-            JOIN agencia ON carta_r.Fk_Agencia = agencia.Id_Area
-            JOIN usuario ON carta_r.Fk_Usuario = usuario.ID_Usuario
-            WHERE carta_r.Resumen LIKE ?;
-        `;
+    if (estado && estado.trim() !== "") {
+        query.estado = estado; // Filtro exacto por estado
+    }
 
-        conn.query(query, [`%${searchTerm}%`], (err, cartas) => {
-            if (err) {
-                console.error('Error al buscar cartas:', err);
-                return res.status(500).send('Error al buscar cartas');
+    if (tienePDF && tienePDF.trim() !== "") {
+        query.tienePDF = tienePDF === "true"; // Convertir el valor a booleano
+    }
+
+    // Buscar las cartas según los filtros
+    collection.find(query).toArray()
+        .then(cartas => {
+            if (!cartas || cartas.length === 0) {
+                cartas = []; // Asegurar que cartas sea un arreglo vacío si no hay resultados
             }
 
-            // Renderizamos la vista con los resultados filtrados
-            res.render('cartaR/ver-carta', { cartas });
+            // Obtener valores únicos de estados y tienePDFs para los filtros
+            const estadosPromise = collection.distinct('estado');
+            const tienePDFsPromise = collection.distinct('tienePDF');
+            const proveedoresPromise = collection.distinct('Fk_Producto.Nom_Proveedor');
+            const agenciasPromise = collection.distinct('Fk_Agencia.Nombre');
+            const usuariosPromise = collection.distinct('Fk_Usuario');
+            const numerosAgenciaPromise = collection.distinct('Fk_Agencia.Num_Agencia');
+
+            // Ejecutar todas las promesas para obtener los valores únicos
+            Promise.all([estadosPromise, tienePDFsPromise, proveedoresPromise, agenciasPromise, usuariosPromise, numerosAgenciaPromise])
+                .then(([estados, tienePDFs, proveedores, agencias, usuarios, numerosAgencia]) => {
+                    // Renderizar la vista y pasar las cartas, filtros y valores únicos
+                    res.render('cartaR/ver-carta', {
+                        cartas,
+                        estados,
+                        tienePDFs,
+                        proveedores,
+                        agencias,
+                        usuarios,
+                        numerosAgencia
+                    });
+                })
+                .catch(err => {
+                    console.error('Error al obtener valores únicos:', err);
+                    res.status(500).json({ message: 'Error al obtener valores únicos', error: err });
+                });
+        })
+        .catch(err => {
+            console.error('Error al buscar cartas:', err);
+            res.status(500).json({ message: 'Error al buscar cartas', error: err });
         });
-    });
 }
 
 

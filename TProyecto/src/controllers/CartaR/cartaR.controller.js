@@ -1,5 +1,8 @@
 // cartaR.controller.js
 const mongoose = require('mongoose');
+const multer = require('multer');
+const storage = multer.memoryStorage(); // Usar memoria en lugar de archivo físico
+const upload = multer({ storage: storage });
 
 // Función para mostrar el formulario de creación de una Carta R
 function crearCarta(req, res) {
@@ -55,7 +58,9 @@ async function guardarCarta(req, res) {
             Fk_Usuario: req.body.Fk_Usuario,
             Resumen: req.body.Resumen,
             FechaU: new Date(req.body.FechaU),
-            id_CartaR: req.body.id_CartaR
+            id_CartaR: req.body.id_CartaR,
+            estado: "Inactiva",
+            tienePDF: false
         };
 
         const resultado = await collection.insertOne(data);
@@ -161,7 +166,7 @@ async function editarCarta(req, res) {
         }
 
         // Obtener los productos relacionados desde la colección MongoDB
-        const idsProductos = carta.Fk_Producto.map(prod => new mongoose.Types.ObjectId(prod.id_P));
+        const idsProductos = carta.Fk_Producto.map(prod => new mongoose.Types.ObjectId(prod._id));
         const productos = await collectionProductos.find({ _id: { $in: idsProductos } }).toArray();
 
         // Formatear los productos para que coincidan con la estructura esperada
@@ -176,6 +181,12 @@ async function editarCarta(req, res) {
                 tipoDato: carac.tipoDato
             }))
         }));
+
+        // Verificar si la carta tiene un archivo PDF
+        let pdfBase64 = null;
+        if (carta.cartaPDF) {
+            pdfBase64 = carta.cartaPDF.buffer.toString('base64'); // Convertir el Buffer a base64
+        }
 
         // Realizar las consultas SQL adicionales
         req.getConnection((err, conn) => {
@@ -200,7 +211,8 @@ async function editarCarta(req, res) {
                             agencias,
                             usuarios,
                             sistemas,
-                            productos: productosFormateados // Productos obtenidos y formateados de MongoDB
+                            productos: productosFormateados, // Productos obtenidos y formateados de MongoDB
+                            pdfBase64  // PDF incluido en los datos
                         });
                     });
                 });
@@ -213,17 +225,20 @@ async function editarCarta(req, res) {
 }
 
 
+
 // Función para actualizar una Carta Responsiva
 async function actualizarCarta(req, res) {
     const id_Carta = req.params.id_Carta; // ID de la carta a actualizar
-    const {
-        Fk_Producto,
-        Fk_Sistema,
-        Fk_Agencia,
-        Fk_Usuario,
-        Resumen,
-        FechaU
-    } = req.body; // Datos recibidos del formulario
+    console.log('Actualizando Carta R:', req.body);
+
+    // Obtener los datos del formulario (cartaResponsiva)
+    let cartaResponsiva = req.body.cartaResponsiva ? JSON.parse(req.body.cartaResponsiva) : {};
+
+    // Asegúrate de que cartaResponsiva tiene los datos que necesitas
+    const { Fk_Producto, Fk_Sistema, Fk_Agencia, Fk_Usuario, Resumen } = cartaResponsiva;
+
+    // Si existe un archivo PDF, está disponible en req.file
+    const cartaPDF = req.file ? req.file.buffer : null; // Aquí usamos el Buffer del archivo
 
     try {
         const db = mongoose.connection; // Conexión a MongoDB
@@ -250,7 +265,9 @@ async function actualizarCarta(req, res) {
             },
             Fk_Usuario: Fk_Usuario || cartaExistente.Fk_Usuario,
             Resumen: Resumen || cartaExistente.Resumen,
-            FechaU: FechaU || new Date()
+            cartaPDF: cartaPDF || cartaExistente.cartaPDF, // Guardamos el Buffer aquí
+            estado: cartaResponsiva.estado || cartaExistente.estado, // Aquí se actualiza el estado si viene en el cuerpo
+            tienePDF: !!cartaPDF // Indicar si la carta tiene un PDF
         };
 
         // Actualizar la carta en la colección
@@ -297,12 +314,49 @@ async function eliminarCarta(req, res) {
     }
 }
 
+async function eliminarCartaPDF(req, res) {
+    console.log('Eliminando PDF de la carta:', req.params);
+    const cartaId = req.params.id; // Usar parámetro de la ruta para el _id del documento
+    console.log('ID de la carta:', cartaId);
 
+    try {
+        const db = mongoose.connection.db;
+        const collection = db.collection('cartas_responsivas');
+
+        // Buscar el documento con el _id proporcionado
+        const carta = await collection.findOne({ _id: new mongoose.Types.ObjectId(cartaId) });
+
+        if (!carta) {
+            return res.status(404).json({ mensaje: 'Carta no encontrada' });
+        }
+
+        // Verificar si la carta tiene un PDF antes de intentar eliminarlo
+        if (!carta.cartaPDF || typeof carta.cartaPDF !== 'object') {
+            return res.status(400).json({ mensaje: 'No se encuentra un PDF válido para eliminar en este documento.' });
+        }
+
+
+        // Eliminar el campo cartaPDF
+        await collection.updateOne(
+            { _id: new mongoose.Types.ObjectId(cartaId) },
+            { $unset: { cartaPDF: "" } } // Utiliza $unset para eliminar el campo
+        );
+
+        res.status(200).json({ mensaje: 'PDF de la carta eliminado exitosamente' });
+    } catch (error) {
+        console.error("Error al eliminar el PDF de la carta:", error);
+        res.status(500).json({ mensaje: "Error al eliminar el PDF de la carta", error });
+    }
+}
+
+
+// Exportar las funciones para usarlas en las rutas
 module.exports = {
     crearCarta: crearCarta,
     guardarCarta: guardarCarta,
     obtenerDatos: obtenerDatos,
     editarCarta: editarCarta,
     actualizarCarta: actualizarCarta,
-    eliminarCarta: eliminarCarta
+    eliminarCarta: eliminarCarta,
+    eliminarCartaPDF: eliminarCartaPDF
 };

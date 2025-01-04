@@ -7,6 +7,8 @@ const mongoose = require('mongoose'); // Para mongodb
 const session = require('express-session');
 const { engine } = require('express-handlebars');
 const bodyParser = require('body-parser');
+const multer = require('multer');
+const upload = multer(); // Configuración básica para manejo de archivos
 //const favicon = require('serve-favicon');
 const path = require('path');
 
@@ -40,6 +42,12 @@ app.engine('.hbs', engine({
         },
         eq: function (a, b) { // Define el helper `eq` para comparar valores
             return a === b;
+        },
+        ifNotEmpty: function (value, options) {
+            if (value && value.trim() !== '') {
+                return options.fn(this);  // Si no está vacío, muestra el bloque dentro del if
+            }
+            return options.inverse(this);  // Si está vacío, muestra el bloque del else
         }
     }
 }));
@@ -55,6 +63,8 @@ app.use(session({ secret: 'mysecret', resave: true, saveUninitialized: true }));
 app.use(bodyParser.json());
 //app.use(favicon(path.join(__dirname, 'public/imagenes', 'favicon-32x32.png'))); // Middleware para el favicon
 
+// Middleware para servir archivos estáticos (si es necesario)
+// app.use(favicon(path.join(__dirname, 'public/imagenes', 'favicon-32x32.png'))); // Middleware para el favicon
 
 // ** Nuevo: Configuración para servir archivos estáticos **
 app.use(express.static(path.join(__dirname, 'public'))); // Exponer la carpeta public como estática

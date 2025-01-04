@@ -21,23 +21,105 @@
 
 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-12">
     <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-4">
-        <!-- Formulario de búsqueda -->
+        <!-- Formulario de búsqueda con filtros adicionales -->
         <form method="POST" action="/verCartaR" class="mb-6">
-            <div class="flex items-center">
-                <input
-                    type="text"
-                    name="searchTerm"
-                    placeholder="Buscar por resumen..."
-                    class="border border-gray-300 rounded px-4 py-2 w-full"
-                />
+            <div class="grid grid-cols-2 gap-4">
+
+                <!-- Filtro por producto -->
+                <div>
+                    <label for="idCarta" class="text-gray-700">Id de Carta:</label>
+                    <input
+                        type="text"
+                        name="idCarta"
+                        placeholder="Buscar por id de carta"
+                        class="border border-gray-300 rounded px-4 py-2 w-full"
+                    />
+                </div>
+
+                <!-- Filtro por usuario -->
+                <div>
+                    <label for="usuario" class="text-gray-700">Usuario:</label>
+                        <select name="usuario" id="usuario" class="w-full  border rounded px-2 py-1">
+                            <option value="">Seleccione...</option>
+                            {{#each usuarios}}
+                                <option value="{{this}}">{{this}}</option>
+                            {{/each}}
+                        </select>
+                </div>
+
+                <!-- Filtro por agencia -->
+                <div>
+                    <label for="numeroAgencia" class="text-gray-700">No. de Agencia:</label>
+                    <select name="numeroAgencia" id="numeroAgencia" class="w-full border rounded px-2 py-1">
+                        <option value="">Seleccione...</option>
+                        {{#each numerosAgencia}}
+                            <option value="{{this}}">{{this}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+
+                <!-- Filtro por No. de Agencia -->
+                <div>
+                    <label for="agencia" class="text-gray-700">Agencia:</label>
+                    <select name="agencia" id="agencia" class="w-full border rounded px-2 py-1">
+                        <option value="">Seleccione...</option>
+                        {{#each agencias}}
+                            <option value="{{this}}">{{this}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+
+                <!-- Filtro Estado de carta-->
+                <div>
+                    <label for="estado" class="text-gray-700">Estado de Carta:</label>
+                    <select name="estado" id="estado" class="w-full border rounded px-2 py-1">
+                        <option value="">Seleccione...</option>
+                        {{#each estados}}
+                            <option value="{{this}}">{{this}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+
+                <!-- Filtro por si tiene PDF la carta -->
+                <div>
+                    <label for="tienePDF" class="text-gray-700">Tiene PDF:</label>
+                    <select name="tienePDF" id="tienePDF" class="w-full border rounded px-2 py-1">
+                        <option value="">Seleccione...</option>
+                        {{#each tienePDFs}}
+                            <option value="{{this}}">{{this}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+
+                <!-- Filtro por rango de fechas -->
+                <div>
+                    <label for="startDate">Desde:</label>
+                    <input
+                        type="date"
+                        name="startDate"
+                        class="border border-gray-300 rounded px-4 py-2 w-full"
+                    />
+                </div>
+                <div>
+                    <label for="endDate">Hasta:</label>
+                    <input
+                        type="date"
+                        name="endDate"
+                        class="border border-gray-300 rounded px-4 py-2 w-full"
+                    />
+                </div>
+            </div>
+
+            <div class="mt-4">
                 <button
                     type="submit"
-                    class="ml-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                 >
                     Buscar
                 </button>
             </div>
         </form>
+
 
         <!-- Tabla de Cartas R -->
         <div class="overflow-x-auto">
@@ -48,12 +130,14 @@
                         <th class="px-4 py-2 text-left text-gray-700 font-semibold">Resumen</th>
                         <th class="px-4 py-2 text-left text-gray-700 font-semibold">Fecha de Creación</th>
                         <th class="px-4 py-2 text-left text-gray-700 font-semibold">Producto</th>
-                        <th class="px-4 py-2 text-left text-gray-700 font-semibold">Sistema</th>
+                        <th class="px-4 py-2 text-left text-gray-700 font-semibold">Tiene PDF</th>
+                        <th class="px-4 py-2 text-left text-gray-700 font-semibold">Estado</th>
                         <th class="px-4 py-2 text-left text-gray-700 font-semibold">Agencia</th>
                         <th class="px-4 py-2 text-left text-gray-700 font-semibold">Usuario</th>
                         <th class="px-4 py-2 text-left text-gray-700 font-semibold">Acciones</th>
                     </tr>
                 </thead>
+                <!-- Iterar sobre las cartas -->
                 <tbody>
                     {{#each cartas}}
                     <tr class="border-b">
@@ -67,7 +151,9 @@
                             {{/each}}
                         </td>
                         <!-- Mostrar el nombre del sistema en lugar de Fk_Sistema -->
-                        <td class="px-4 py-2 text-gray-700">{{Fk_Sistema.Nombre}}</td>
+                        <td class="px-4 py-2 text-gray-700">{{tienePDF}}</td>
+                        <!-- Mostrar el nombre del sistema en lugar de Fk_Sistema -->
+                        <td class="px-4 py-2 text-gray-700">{{estado}}</td>
                         <!-- Mostrar el nombre de la agencia en lugar de Fk_Agencia -->
                         <td class="px-4 py-2 text-gray-700">{{Fk_Agencia.Nombre}}</td>
                         <!-- Mostrar el nombre del usuario en lugar de Fk_Usuario -->

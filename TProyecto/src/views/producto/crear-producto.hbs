@@ -185,6 +185,25 @@
 
 
 <script>
+    
+    // Cargar las características del producto dinámicamente desde la nueva ruta
+    document.addEventListener('DOMContentLoaded', async () => {
+        const selectElement = document.getElementById('caracteristicasSelect');
+        const container = document.getElementById('caracteristicas-container');
+        actualizarSelectCaracteristicas();
+        // Evento para agregar una nueva característica al seleccionar una opción
+        selectElement.addEventListener('change', (event) => {
+            const selectedCaracteristica = event.target.value;
+            console.log('Característica seleccionada:');
+            console.log(selectedCaracteristica)
+
+            // Verificar que se haya seleccionado una opción válida
+            if (selectedCaracteristica) {
+                // Llamar a la función para agregar la característica seleccionada
+                agregarCaracteristica(selectedCaracteristica, container);
+            }
+        });
+    });
 
     // Cargar las características del producto dinámicamente desde la nueva ruta
     document.getElementById('tipoProducto').addEventListener('change', function () {
@@ -194,11 +213,12 @@
         //Mostrar el select para agregar caracteristicas
         document.getElementById('caracteristicasSelect').classList.remove('hidden');
         //Mostrar el select para agregar caracteristicas
-        document.getElementById('actualizarCaracteristicasProductoButton').classList.remove('hidden');
+        //document.getElementById('actualizarCaracteristicasProductoButton').classList.remove('hidden');
 
         const tipoProducto = this.value;
 
         if (tipoProducto) {
+            // Hacer la petición al servidor para obtener las características del producto
             fetch(`/caracteristicas/${tipoProducto}`)
                 .then(response => response.json())
                 .then(caracteristicas => {
@@ -219,8 +239,10 @@
     // Función para agregar una nueva característica al contenedor
     function agregarCaracteristica(caracteristica, container, caracteristicas) {
         const div = document.createElement('div'); 
+        // Agregar clases al div
         div.classList.add('flex', 'items-center', 'space-x-4', 'my-4');
 
+        // Crear un div para los labels
         const divLabels = document.createElement('div');
         divLabels.classList.add('flex', 'items-center', 'px-5', 'gap-20', 'my-4');
 
@@ -230,6 +252,7 @@
             'border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2',
             'text-lg', 'focus:bg-white', 'w-1/5', 'min-w-[150px]'
         );
+        // Agregar opciones al select
         tipoDatoSelect.innerHTML = `
             <option value="text" ${caracteristica.tipoDato === 'text' ? 'selected' : ''}>Texto</option>
             <option value="number" ${caracteristica.tipoDato === 'number' ? 'selected' : ''}>Numérico</option>
@@ -240,6 +263,7 @@
         // Campo de entrada dinámico (input o select)
         let campoDinamico;
         if (caracteristica.tipoDato === 'boolean') {
+            // Crear un select para booleanos
             campoDinamico = document.createElement('select');
             campoDinamico.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'w-1/2');
             campoDinamico.innerHTML = `
@@ -250,6 +274,7 @@
             campoDinamico.value = caracteristica.valor;
             campoDinamico.required = true;
         } else {
+            // Crear un campo de texto por defecto
             campoDinamico = document.createElement('input');
             campoDinamico.type = caracteristica.tipoDato || 'text';
             campoDinamico.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'focus:bg-white', 'w-1/2', 'min-w-[180px]', 'h-12');
@@ -332,6 +357,7 @@
             const currentField = parentDiv.querySelector('input, select:not([name="tipoDatoSelect"])');
 
             if (selectedType === 'boolean') {
+                // Reemplazar el campo de texto por un select
                 const comboBox = document.createElement('select');
                 comboBox.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'w-1/2');
                 comboBox.innerHTML = `
@@ -341,6 +367,7 @@
                 `;
                 parentDiv.replaceChild(comboBox, currentField);
             } else {
+                // Reemplazar el select por un campo de texto
                 const inputReplacement = document.createElement('input');
                 inputReplacement.type = selectedType;
                 inputReplacement.classList.add('border', 'border-gray-300', 'rounded-md', 'bg-gray-200', 'p-2', 'text-lg', 'focus:bg-white', 'w-1/2', 'min-w-[180px]', 'h-12');
@@ -356,6 +383,7 @@
         const selectElementEliminar = document.getElementById('eliminarCaracteristicasSelect');
         const nombresOcultos = ["Modelo", "Serie", "Precio (MXN)"];
 
+        // Hacer la petición al servidor para obtener las características
         try {
             const response = await fetch('/caracteristicas');
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -387,35 +415,16 @@
         }
     }
 
-    // Cargar las características del producto dinámicamente desde la nueva ruta
-    document.addEventListener('DOMContentLoaded', async () => {
-        const selectElement = document.getElementById('caracteristicasSelect');
-        const container = document.getElementById('caracteristicas-container');
-        actualizarSelectCaracteristicas();
-        // Evento para agregar una nueva característica al seleccionar una opción
-        selectElement.addEventListener('change', (event) => {
-            const selectedCaracteristica = event.target.value;
-            console.log('Característica seleccionada:');
-            console.log(selectedCaracteristica)
-
-            // Verificar que se haya seleccionado una opción válida
-            if (selectedCaracteristica) {
-                // Llamar a la función para agregar la característica seleccionada
-                agregarCaracteristica(selectedCaracteristica, container);
-            }
-        });
-    });
-
     // Evento para el segundo contenedor (Agregar nuevo tipo de producto)
     document.getElementById('nuevoTipoProductoForm').addEventListener('submit', async function(event) {
-
         const tipoProducto = document.getElementById('nuevoTipoProductoInput').value.trim();
+        // Validar que el campo no esté vacío
         if (!tipoProducto) {
             alert("Por favor, ingresa un nombre para el tipo de producto.");
             return;
         }
-
         try {
+            // Hacer la petición al servidor para agregar un nuevo tipo de producto
             const response = await fetch('/nuevoTipoProducto', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -423,6 +432,7 @@
             });
 
             if (response.ok) {
+                // Mostrar un mensaje de éxito
                 alert("Tipo de producto agregado con éxito.");
                 document.getElementById('nuevoTipoProductoInput').value = ""; // Limpiar el input
             } else {
@@ -439,11 +449,13 @@
 
         const nombreCaracteristica = document.getElementById('nuevaCaracteristicaInput').value.trim();
         if (!nombreCaracteristica) {
+            // Validar que el campo no esté vacío
             alert("Por favor, ingresa un nombre para la característica.");
             return;
         }
 
         try {
+            // Hacer la petición al servidor para agregar una nueva característica
             const response = await fetch('/nuevaCaracteristica', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -457,6 +469,7 @@
             });
 
             if (response.ok) {
+                // Mostrar un mensaje de éxito
                 alert("Característica agregada con éxito.");
                 document.getElementById('nuevaCaracteristicaInput').value = ""; // Limpiar el input
                 //window.location.reload(); // Recargar la página
@@ -476,13 +489,14 @@
         console.log(selectElement);
         const tipoProducto = selectElement.value;
         
-
+        // Validar que se haya seleccionado un tipo de producto
         if (!tipoProducto) {
             alert('Por favor, selecciona un tipo de producto.');
             return;
         }
 
         try {
+            // Hacer la petición al servidor para eliminar el tipo de producto
             const response = await fetch(`/eliminarTipoProducto/${encodeURIComponent(tipoProducto)}`, {
                 method: 'POST',
                 headers: {
@@ -494,6 +508,7 @@
             const data = await response.json();
 
             if (response.ok) {
+                // Mostrar un mensaje de éxito
                 alert(data.message);
                 // Aquí puedes agregar lógica para actualizar la interfaz, como eliminar la opción del select
                 selectElement.querySelector(`option[value="${tipoProducto}"]`).remove();
@@ -512,12 +527,14 @@
         const selectElement = document.getElementById('eliminarCaracteristicasSelect');
         const nombreCaracteristica = selectElement.value;
 
+        // Validar que se haya seleccionado una característica
         if (!nombreCaracteristica) {
             alert('Por favor, selecciona una característica para eliminar.');
             return;
         }
 
         try {
+            // Hacer la petición al servidor para eliminar la característica
             const response = await fetch(`/eliminarCaracteristica/${encodeURIComponent(nombreCaracteristica)}`, {
                 method: 'POST',
                 headers: {

@@ -119,6 +119,19 @@
             >
                 Agregar
             </button>
+                        <div class="flex justify-center">
+                <select id="eliminarCaracteristicasSelect" class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
+                    p-2 my-2 focus:bg-white" >
+                    <option value="" disabled selected>Seleccionar característica</option>
+                </select>
+            </div>
+            <button 
+                type="button" 
+                id="eliminarCaracteristicaButton" 
+                class="rounded-md bg-gray-500 w-full text-lg text-white font-semibold p-2 my-3 hover:bg-gray-500 focus:bg-gray-700"
+                    >
+                Eliminar caracteristica de la lista
+            </button>
         </div>
 
         <!-- Segundo contenedor -->
@@ -142,12 +155,39 @@
                     Agregar
                 </button>
             </form>
+            <!-- Selección del tipo de producto -->
+            <select 
+                id="tipoProductoEliminar" 
+                class="border border-gray-200 rounded-md bg-gray-200 w-full text-lg placeholder-gray-500 
+                    p-2 my-2 focus:bg-white" 
+                name="tipoProducto" 
+                required    
+            >   
+                <option value="" disabled selected>Seleccionar Tipo de Producto</option>
+                {{#each tiposProductos}}
+                    <option 
+                        value="{{tipo_producto}}" 
+                        {{#ifCond ../product.tipoProducto tipo_producto}}selected{{/ifCond}}
+                    >
+                        {{tipo_producto}}
+                    </option>
+                {{/each}}
+            </select>
+            <!-- Botón para Eliminar tipo de producto -->
+            <button 
+                type="button" 
+                id="eliminarTipoProductoButton" 
+                class="rounded-md bg-gray-500 w-full text-lg text-white font-semibold p-2 my-3 hover:bg-gray-500 focus:bg-gray-700"
+            >
+                Eliminar tipo de producto
+            </button>
         </div>
     </div>
 
 </div>
 
 <script>
+    // Función para cargar los datos del producto
     async function cargarProducto() {
         try {
             // Obtener el ID de la URL (último valor del pathname)
@@ -168,6 +208,7 @@
             for (let caracteristica of data.product.Caracteristicas) {
                 console.log(caracteristica.nombre, caracteristica.tipoDato, caracteristica.valor, caracteristica.opcional);
                 agregarCaracteristica(caracteristica, document.getElementById('caracteristicas-container'));
+                actualizarSelectCaracteristicas();
             }
         } catch (error) {
             console.error("Error:", error);
@@ -310,7 +351,7 @@ function agregarCaracteristica(caracteristica, container) {
 }
 
 
-
+    // Función para agregar una nueva característica al seleccionar una opción
     document.addEventListener('DOMContentLoaded', async () => {
         const selectElement = document.getElementById('caracteristicasSelect');
         const container = document.getElementById('caracteristicas-container');
@@ -372,6 +413,7 @@ function agregarCaracteristica(caracteristica, container) {
             if (response.ok) {
                 alert("Tipo de producto agregado con éxito.");
                 document.getElementById('nuevoTipoProductoInput').value = ""; // Limpiar el input
+                window.location.reload(); // Recargar la página
             } else {
                 alert("Error al agregar el tipo de producto.");
             }
@@ -382,8 +424,11 @@ function agregarCaracteristica(caracteristica, container) {
     });
 
 
+    // Función para actualizar el select de características
     async function actualizarSelectCaracteristicas() {
         const selectElement = document.getElementById('caracteristicasSelect');
+        const selectElementEliminar = document.getElementById('eliminarCaracteristicasSelect');
+        const nombresOcultos = ["Modelo", "Serie", "Precio (MXN)"];
 
         try {
             const response = await fetch('/caracteristicas');
@@ -392,15 +437,21 @@ function agregarCaracteristica(caracteristica, container) {
             const data = await response.json();
 
             if (Array.isArray(data)) {
-                // Limpiar las opciones existentes
+                // Limpiar las opciones existentes en ambos selectores
                 selectElement.innerHTML = '<option value="">Agregar característica</option>';
+                selectElementEliminar.innerHTML = '<option value="">Eliminar característica</option>';
 
                 // Agregar las nuevas opciones
                 data.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item.caracteristica;
-                    option.textContent = item.caracteristica;
-                    selectElement.appendChild(option);
+                    if (!nombresOcultos.includes(item.nombre)) {
+                        const option = document.createElement('option');
+                        option.value = item.nombre;
+                        option.textContent = item.nombre;
+
+                        // Agregar opción a ambos selectores
+                        selectElement.appendChild(option);
+                        selectElementEliminar.appendChild(option.cloneNode(true));
+                    }
                 });
             } else {
                 throw new Error('El formato de los datos no es válido.');
@@ -448,7 +499,7 @@ function agregarCaracteristica(caracteristica, container) {
     });
 
 
-
+    // Evento para el primer contenedor (Guardar producto)
     document.querySelector('form').addEventListener('submit', async (event) => {
         event.preventDefault(); // Evita recargar la página
 
@@ -516,6 +567,79 @@ function agregarCaracteristica(caracteristica, container) {
             alert('Error al enviar los datos');
         }
     });
+
+        // Evento para el segundo contenedor (Eliminar tipo de producto)
+    document.getElementById('eliminarTipoProductoButton').addEventListener('click', async () => {
+        const selectElement = document.getElementById('tipoProductoEliminar');
+        console.log(selectElement);
+        const tipoProducto = selectElement.value;
+        
+
+        if (!tipoProducto) {
+            alert('Por favor, selecciona un tipo de producto.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/eliminarTipoProducto/${encodeURIComponent(tipoProducto)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ tipoProducto }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                // Aquí puedes agregar lógica para actualizar la interfaz, como eliminar la opción del select
+                selectElement.querySelector(`option[value="${tipoProducto}"]`).remove();
+                window.location.reload(); // Recargar la página
+            } else {
+                alert(data.error || 'Error al eliminar el tipo de producto.');
+            }
+        } catch (error) {
+            console.error('Error al eliminar el tipo de producto:', error);
+            alert('Hubo un problema al procesar tu solicitud.');
+        }
+    });
+
+    // Evento para el segundo contenedor (Eliminar características del tipo de producto)
+    document.getElementById('eliminarCaracteristicaButton').addEventListener('click', async () => {
+        const selectElement = document.getElementById('eliminarCaracteristicasSelect');
+        const nombreCaracteristica = selectElement.value;
+
+        if (!nombreCaracteristica) {
+            alert('Por favor, selecciona una característica para eliminar.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/eliminarCaracteristica/${encodeURIComponent(nombreCaracteristica)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ nombreCaracteristica }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.mensaje);
+                // Actualizar la lista de características eliminando la seleccionada
+                //selectElement.querySelector(`option[value="${nombreCaracteristica}"]`).remove();
+                actualizarSelectCaracteristicas();
+            } else {
+                alert(data.mensaje || 'Error al eliminar la característica.');
+            }
+        } catch (error) {
+            console.error('Error al eliminar la característica:', error);
+            alert('Hubo un problema al procesar tu solicitud.');
+        }
+    });
+
 
 
             // Ejecutar cuando cargue la página

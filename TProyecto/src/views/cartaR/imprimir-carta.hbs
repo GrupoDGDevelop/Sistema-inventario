@@ -18,17 +18,17 @@
     }
     .header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       display: flex;
       justify-content: center; /* Centra los logos en el espacio disponible */
       gap: 20px; /* Espacio entre los logos */
     }
     .header img {
-      height: 50px;
+      height: 40px;
       margin: 0; /* Elimina el margen adicional entre los logos */
     }
     .section {
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
     .section-title {
       font-weight: bold;
@@ -45,7 +45,12 @@
       border: 1px solid #ccc;
       padding: 5px;
       text-align: left;
+      width: auto; /* Asegura que las celdas ajusten su ancho */
     }
+    .expand {
+        width: 100%; /* Expande el input al 100% del ancho de la celda */
+        box-sizing: border-box; /* Incluye el padding y el borde dentro del ancho */
+      }
     .table th {
       background-color: #007bff;
       color: white;
@@ -142,7 +147,8 @@
 
     
   <!-- Segunda Hoja -->
-  <div class="container" style="font-size: 12px;"> <!-- Reducimos el tamaño de la letra -->
+  <div class="container" style="font-size: 11.5px;"> <!-- Reducimos el tamaño de la letra -->
+    <p style="font-size: 8px;">{{carta.id_CartaR}}</p>
     <div class="header">
       <img src="/imagenes/grupoDG-logo.png" alt="Grupo Logo">
       <img src="/imagenes/Volkswagen-logo.png" alt="VW Logo">
@@ -166,17 +172,19 @@
         <li>En caso de algún percance, ya sea robo, extravió, o que el equipo sufra algún derrame de líquido avisar primeramente al área de sistemas, para que ellos me comenten el proceso que se debe realizar.</li>
       </ol>
       <br>
-      <p>
-      He recibido información sobre las políticas que Grupo DG. Dispone con respecto al uso del software y convengo en cumplirlas, así como la aceptación del Software instalado en el equipo de cómputo asignado para realizar mis tareas. Así mismo declaro me responsabilizo de las aplicaciones de Software sin licencia y previa autorización, deslindando a Grupo DG de toda acción legal que esto ocasione.  
-      </p>
-      <br>
-      <p>
-        Para el caso de terminación de la relación laboral por cualquier causa, o bien que me sea requerido el equipo en cualquier momento, me obligó a entregar inmediatamente el equipo asignado. Y en el evento de que dicho equipo no lo entregue en el momento que me sea requerido por la empresa, o entregándolo esté presente algún daño, ya sea intencional, o negligencia inexcusable, me obligo a cubrir el pago de los daños o perjuicios ocasionados, autorizando que me sea descontado de mi pago de salarios o bien me sea descontado de mi finiquito en caso de terminación de la relación laboral.
-      </p>
-      <br>
-      <p>
-        En virtud de lo anterior, desde ahora me hago sabedor del contenido de esta responsiva, por lo que me responsabilizo de las consecuencias por el mal uso, daño provocado o indebida disposición de los hardware descritos, comprometiéndome a pagar cualquier sanción, multa, daño o perjuicio ocasionado por mi negligencia o mala fe, obligándome a responder de ello ante la propia sociedad o ante cualquier tercero que en su caso resulte afectado.La presente responsiva la firmó de conformidad habiendo leído su contenido.
-      </p>
+      <div  style="font-size: 11px;">
+        <p>
+        He recibido información sobre las políticas que Grupo DG. Dispone con respecto al uso del software y convengo en cumplirlas, así como la aceptación del Software instalado en el equipo de cómputo asignado para realizar mis tareas. Así mismo declaro me responsabilizo de las aplicaciones de Software sin licencia y previa autorización, deslindando a Grupo DG de toda acción legal que esto ocasione.  
+        </p>
+        <br>
+        <p>
+          Para el caso de terminación de la relación laboral por cualquier causa, o bien que me sea requerido el equipo en cualquier momento, me obligó a entregar inmediatamente el equipo asignado. Y en el evento de que dicho equipo no lo entregue en el momento que me sea requerido por la empresa, o entregándolo esté presente algún daño, ya sea intencional, o negligencia inexcusable, me obligo a cubrir el pago de los daños o perjuicios ocasionados, autorizando que me sea descontado de mi pago de salarios o bien me sea descontado de mi finiquito en caso de terminación de la relación laboral.
+        </p>
+        <br>
+        <p>
+          En virtud de lo anterior, desde ahora me hago sabedor del contenido de esta responsiva, por lo que me responsabilizo de las consecuencias por el mal uso, daño provocado o indebida disposición de los hardware descritos, comprometiéndome a pagar cualquier sanción, multa, daño o perjuicio ocasionado por mi negligencia o mala fe, obligándome a responder de ello ante la propia sociedad o ante cualquier tercero que en su caso resulte afectado.La presente responsiva la firmó de conformidad habiendo leído su contenido.
+        </p>
+      </div>
     </div>
 
   
@@ -254,7 +262,7 @@
           <tr>
             <td>{{carta.Fk_Agencia.Nombre}}</td>
             <td>{{carta.Fk_Agencia.Num_Agencia}}</td>
-            <td>{{carta.Fk_Agencia.Departamento}}</td>
+            <td contenteditable="true">{{carta.Fk_Agencia.Departamento}}</td>
           </tr>
         </tbody>
       </table>
@@ -269,13 +277,36 @@
             <th>Nombre</th>
             <th>Puesto</th>
             <th>Firma</th>
+            <th>No. de Nomina</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td> <br> </td>
-            <td> </td>
-            <td> </td>
+            <td>
+              <textarea
+                class="text-center border border-gray-300 rounded px-2 py-1 text-[12px] focus:outline-none focus:ring focus:ring-blue-300 resize-none overflow-hidden w-full"
+                placeholder="Escriba nombre del usuario"
+                oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+                rows="1"
+              ></textarea>
+            </td>
+            <td>
+              <textarea
+                class="text-center border border-gray-300 rounded px-2 py-1 text-[12px] focus:outline-none focus:ring focus:ring-blue-300 resize-none overflow-hidden w-full"
+                placeholder="Escriba nombre del puesto"
+                oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+                rows="1"
+              ></textarea>
+            </td>
+            <td> <br><br></td>
+            <td>
+              <textarea
+                class="text-center border border-gray-300 rounded px-2 py-1 text-[12px] focus:outline-none focus:ring focus:ring-blue-300 resize-none overflow-hidden w-full"
+                placeholder="Escriba nombre del No. Nomina"
+                oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+                rows="1"
+              ></textarea>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -283,27 +314,40 @@
 
     <!-- Firmas -->
     <div class="section">
-      <div class="section-title">Firma del Usuario</div>
       <div class="signature">
         <div>
-          <input type="text" class="text-center" placeholder="Escriba nombre del Gerente">	
-                    <p><br></p>
+          <p><br></p>
+          <p><br></p>
+          <textarea
+            class="text-center border border-gray-300 rounded p-0 text-[12px] focus:outline-none focus:ring focus:ring-blue-300 resize-none overflow-hidden"
+            placeholder="Escriba nombre del Gerente"
+            oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+            rows="1"
+          ></textarea>
           <p>________________________</p>
           <p>Nombre y Firma de Gerente de Área</p>
         </div>
         <div>
-          <input type="text" class="text-center" placeholder="Escriba nombre del Gerente">
-                    <p><br></p>
+          <p><br></p>
+          <p><br></p>
+          <textarea
+            class="text-center border border-gray-300 rounded px-2 py-1 text-[12px] focus:outline-none focus:ring focus:ring-blue-300 resize-none overflow-hidden"
+            placeholder="Escriba nombre del Gerente"
+            oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+            rows="1"
+          ></textarea>
           <p>_________________________</p>
           <p>Nombre y Firma de Gerente Operativo o General</p>
         </div>
         <div>
-          <td>{{carta.Fk_Usuario}}</td>
           <p><br></p>
+          <p><br></p>
+          <td>{{carta.Fk_Usuario}}</td>
           <p>_________________________</p>
           <p>Firma de Responsable de Sistemas</p>
         </div>
       </div>
+    </div> <!-- Cierre de la sección de firmas -->
     </div>
 
   </div>

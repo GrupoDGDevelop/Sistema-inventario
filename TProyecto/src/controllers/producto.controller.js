@@ -1,47 +1,137 @@
 const mongoose = require('mongoose');
 
 
-function verProducto(req, res) {
-    // Obtiene y muestra todos los productos, incluyendo su marca y proveedor relacionados.
-    req.getConnection((err, conn) => {
-        const read = `
-            SELECT Producto.*, Marca.Nom_Marca, Proveedor.Nom_Proveedor 
-            FROM Producto 
-            JOIN Marca ON Producto.Fk_Marca = Marca.Id_Marca 
-            JOIN Proveedor ON Producto.Fk_Proveedor = Proveedor.Id_Proveedor
-            ORDER BY Producto.ID_Producto ASC;
-        `;
+// Función para ver todos los productos con sus marcas, proveedores y tipos de producto desde MongoDB
+async function verProducto(req, res) {
+    const respuestaJson = req.query.json === 'true'; // Verifica si debe responder con JSON
 
-        conn.query(read, (err, product) => {
-            if (err) {
-                res.json(err);
-            }
-            res.render('producto/producto', { product });
-        });
-    });
+    try {
+        // Buscar todos los productos en MongoDB
+        const productos = await mongoose.connection.db.collection('productos').find({}).toArray();
+
+        if (!productos.length) {
+            const errorMensaje = { error: "No se encontraron productos" };
+            return respuestaJson ? res.status(404).json(errorMensaje) : res.status(404).render('error', errorMensaje);
+        }
+
+        // Mapeo de productos para incluir marcas y proveedores
+        const productosConMarcasYProveedores = productos.map(producto => ({
+            ID_Producto: producto._id,
+            Nom_Producto: producto.tipoProducto,
+            Modelo: producto.caracteristicas.find(c => c.nombre === "Modelo")?.valor || "N/A",
+            Caracteristicas: producto.caracteristicas,
+            Fk_Marca: producto.Fk_Marca,
+            Fk_Proveedor: producto.Fk_Proveedor,
+            Precio_Total: producto.caracteristicas.find(c => c.nombre === "Precio")?.valor || producto.caracteristicas.find(c => c.nombre === "Precio (MXN)")?.valor || "N/A",
+            Nota: producto.nota || "N/A"
+        }));
+
+        // Extraer los tipos de producto únicos de los productos obtenidos
+        const tiposProducto = [...new Set(productos.map(producto => producto.tipoProducto))]; // Extrae solo los tipos únicos
+
+        // Extraer las marcas únicas de los productos
+        const marcas = [...new Set(productos.map(producto => producto.Fk_Marca))];
+
+        // Extraer los proveedores únicos de los productos
+        const proveedores = [...new Set(productos.map(producto => producto.Fk_Proveedor))];
+
+        // Construcción del objeto de respuesta
+        const data = {
+            productos: productosConMarcasYProveedores,
+            marcas: marcas.map(marca => ({
+                Nom_Marca: marca
+            })),
+            proveedores: proveedores.map(proveedor => ({
+                Nom_Proveedor: proveedor
+            })),
+            tiposProducto // Añadimos los tipos de producto únicos a la respuesta
+        };
+
+        // Responder con JSON o renderizar la vista
+        if (respuestaJson) {
+            res.json(data);
+        } else {
+            res.render('producto/producto', data);
+        }
+
+    } catch (error) {
+        console.error("Error al cargar los productos:", error);
+        const errorMensaje = { error: "Error interno del servidor" };
+        return respuestaJson ? res.status(500).json(errorMensaje) : res.status(500).render('error', errorMensaje);
+    }
 }
 
-function buscarP(req, res) {
-    // Busca productos que coincidan con el término ingresado por el usuario.
-    const searchTerm = req.body.searchTerm;
 
-    req.getConnection((err, conn) => {
-        const query = `
-            SELECT Producto.*, Marca.Nom_Marca AS Marca, Proveedor.Nom_Proveedor AS Proveedor
-            FROM Producto
-            JOIN Marca ON Producto.FK_Marca = Marca.ID_Marca
-            JOIN Proveedor ON Producto.FK_Proveedor = Proveedor.ID_Proveedor
-            WHERE Producto.Nombre LIKE ?
-        `;
+// Función para buscar productos en la base de datos
+async function buscarP(req, res) {
+    const { tipoProducto, marca, proveedor, numSerie } = req.body; // Añadido numSerie
+    const respuestaJson = req.query.json === 'true'; // Verificar si se debe responder con JSON
 
-        conn.query(query, [`%${searchTerm}%`], (err, product) => {
-            if (err) {
-                res.json(err);
-            }
-            res.render('producto/producto', { product });
-        });
-    });
+    try {
+        // Crear un objeto de filtro que será utilizado en la consulta de productos
+        let filtro = {};
+
+        // Agregar filtros si se proporcionaron valores
+        if (tipoProducto) {
+            filtro.tipoProducto = tipoProducto; // Filtrar por tipo de producto
+        }
+        if (marca) {
+            filtro.Fk_Marca = marca; // Filtrar por marca
+        }
+        if (proveedor) {
+            filtro.Fk_Proveedor = proveedor; // Filtrar por proveedor
+        }
+        if (numSerie) {
+            filtro['caracteristicas.nombre'] = "Número de Serie"; // Campo donde se guarda el número de serie
+            filtro['caracteristicas.valor'] = numSerie; // Filtrar por el valor del número de serie
+        }
+
+        // Buscar productos en MongoDB según los filtros aplicados
+        const productos = await mongoose.connection.db.collection('productos').find(filtro).toArray();
+
+        // Manejo de la respuesta si no se encontraron productos (retorna lista vacía)
+        let productosConMarcasYProveedores = [];
+        if (productos.length) {
+            // Mapeo de productos para incluir marcas y proveedores si se encontraron productos
+            productosConMarcasYProveedores = productos.map(producto => ({
+                ID_Producto: producto._id,
+                Nom_Producto: producto.tipoProducto,
+                Modelo: producto.caracteristicas.find(c => c.nombre === "Modelo")?.valor || "N/A",
+                Caracteristicas: producto.caracteristicas,
+                Fk_Marca: producto.Fk_Marca,
+                Fk_Proveedor: producto.Fk_Proveedor,
+                Precio_Total: producto.caracteristicas.find(c => c.nombre === "Precio")?.valor || producto.caracteristicas.find(c => c.nombre === "Precio (MXN)")?.valor || "N/A",
+                Nota: producto.nota || "N/A"
+            }));
+        }
+
+        // --- Aquí obtenemos los valores únicos de todos los productos en la base de datos ---
+        const todosLosProductos = await mongoose.connection.db.collection('productos').find().toArray();
+
+        const tiposProducto = [...new Set(todosLosProductos.map(producto => producto.tipoProducto))];
+        const marcas = [...new Set(todosLosProductos.map(producto => producto.Fk_Marca))];
+        const proveedores = [...new Set(todosLosProductos.map(producto => producto.Fk_Proveedor))];
+
+        const data = {
+            productos: productosConMarcasYProveedores,
+            marcas: marcas.map(marca => ({ Nom_Marca: marca })),
+            proveedores: proveedores.map(proveedor => ({ Nom_Proveedor: proveedor })),
+            tiposProducto
+        };
+
+        if (respuestaJson) {
+            res.json(data);
+        } else {
+            res.render('producto/producto', data);
+        }
+    } catch (error) {
+        console.error("Error al buscar productos:", error);
+        const errorMensaje = { error: "Error interno del servidor" };
+        return respuestaJson ? res.status(500).json(errorMensaje) : res.status(500).render('error', errorMensaje);
+    }
 }
+
+
 
 async function crearP(req, res) {
     try {
@@ -187,7 +277,48 @@ async function agregarCaracteristica(req, res) {
         const collection = db.collection('tipos_productos'); // Nombre de la colección en tu base de datos
 
         // Buscar el producto "producto_base"
-        const productoBase = await collection.findOne({ tipo_producto: 'producto_base' });
+        let productoBase = await collection.findOne({ tipo_producto: 'producto_base' });
+
+        if (!productoBase) {
+        // Crear el objeto "producto_base" si no existe
+        const nuevoProductoBase = {
+            tipo_producto: 'producto_base',
+            caracteristicas: [
+            {
+                nombre: 'Modelo',
+                tipoDato: 'text',
+                num_caracteres_min: 0,
+                num_caracteres_max: 40,
+                opcional: false,
+            },
+            {
+                nombre: 'Serie',
+                tipoDato: 'text',
+                num_caracteres_min: 0,
+                num_caracteres_max: 40,
+                opcional: false,
+            },
+            {
+                nombre: 'Precio (MXN)',
+                tipoDato: 'number',
+                num_caracteres_min: 0,
+                num_caracteres_max: 40,
+                opcional: false,
+            },
+            ],
+        };
+
+        // Insertar el nuevo producto en la base de datos
+        const resultado = await collection.insertOne(nuevoProductoBase);
+        console.log('Producto "producto_base" creado:', resultado.insertedId);
+        
+        // Buscar nuevamente el producto "producto_base" después de insertarlo
+        productoBase = await collection.findOne({ tipo_producto: 'producto_base' });
+        } else {
+        console.log('Producto "producto_base" ya existe:', productoBase);
+        }
+
+
 
         if (!productoBase) {
             return res.status(404).json({ mensaje: 'Producto base no encontrado' });
@@ -218,7 +349,7 @@ async function agregarCaracteristica(req, res) {
         res.status(500).json({ mensaje: "Error al agregar la característica", error });
     }
 }
-
+// A
 async function eliminarTipoProducto(req, res) {
     console.log(req.params);
     const tipoProducto = req.params.tipoProducto;
@@ -267,7 +398,7 @@ async function eliminarCaracteristica(req, res) {
     }
 }
 
-
+//
 async function agregarProducto(req, res) {
     try {
         // Conexión a la base de datos

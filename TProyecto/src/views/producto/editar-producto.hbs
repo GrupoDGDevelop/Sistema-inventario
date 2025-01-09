@@ -443,10 +443,10 @@ function agregarCaracteristica(caracteristica, container) {
 
                 // Agregar las nuevas opciones
                 data.forEach(item => {
-                    if (!nombresOcultos.includes(item.nombre)) {
+                    if (!nombresOcultos.includes(item)) {
                         const option = document.createElement('option');
-                        option.value = item.nombre;
-                        option.textContent = item.nombre;
+                        option.value = item;
+                        option.textContent = item;
 
                         // Agregar opción a ambos selectores
                         selectElement.appendChild(option);
@@ -557,7 +557,7 @@ function agregarCaracteristica(caracteristica, container) {
             if (response.ok) {
                 const data = await response.json();
                 alert(data.message);
-                window.location.href = '/verProducto'; // Redirigir después de mostrar el alert
+                //window.location.href = '/verProducto'; // Redirigir después de mostrar el alert
             } else {
                 alert('Error al Actualizar el producto');
             }

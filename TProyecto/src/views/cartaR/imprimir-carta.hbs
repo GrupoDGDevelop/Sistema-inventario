@@ -109,6 +109,15 @@
       .page-break {
         page-break-after: always; /* Fuerza un salto de página */
       }
+      textarea {
+        border: none; /* Elimina los bordes */
+        outline: none; /* Elimina el contorno */
+        resize: none; /* Desactiva el cambio de tamaño */
+      }
+      
+      textarea::placeholder {
+        color: transparent; /* Hace invisible el texto del placeholder */
+      }
     }
   ol {
     counter-reset: item;

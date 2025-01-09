@@ -397,10 +397,10 @@
 
                 // Agregar las nuevas opciones
                 data.forEach(item => {
-                    if (!nombresOcultos.includes(item.nombre)) {
+                    if (!nombresOcultos.includes(item)) {
                         const option = document.createElement('option');
-                        option.value = item.nombre;
-                        option.textContent = item.nombre;
+                        option.value = item;
+                        option.textContent = item;
 
                         // Agregar opción a ambos selectores
                         selectElement.appendChild(option);

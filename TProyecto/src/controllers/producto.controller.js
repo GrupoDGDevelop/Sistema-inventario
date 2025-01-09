@@ -193,28 +193,29 @@ async function obtenerCaracteristicas(req, res) {
     }
 }
 
-// Función para obtener las características únicas de los productos
+// Función para obtener los nombres de las características del producto_base
 async function unicas(req, res) {
     try {
         // Conexión directa a la base de datos
         const db = mongoose.connection.db; // Conexión a MongoDB
         const collection = db.collection('tipos_productos'); // Nombre de la colección en tu base de datos
 
-        // Consulta para obtener las características únicas
+        // Consulta para obtener los nombres de las características del producto_base
         const resultado = await collection.aggregate([
+            { $match: { tipo_producto: "producto_base" } }, // Filtramos por tipo de producto "producto_base"
             { $unwind: "$caracteristicas" }, // Descomponemos el array de características
-            { $group: { _id: "$caracteristicas.nombre" } }, // Agrupamos por característica
-            { $project: { _id: 0, nombre: "$_id" } }, // Seleccionamos solo el campo `caracteristica`
-            { $sort: { caracteristica: 1 } } // Ordenamos alfabéticamente
+            { $project: { _id: 0, nombre: "$caracteristicas.nombre" } }, // Seleccionamos solo el campo `nombre`
+            { $sort: { nombre: 1 } } // Ordenamos alfabéticamente
         ]).toArray(); // Convertimos el cursor a un array
 
         // Enviamos la respuesta al cliente
-        res.status(200).json(resultado);
+        res.status(200).json(resultado.map(item => item.nombre));
     } catch (error) {
-        console.error("Error al obtener características únicas:", error);
-        res.status(500).json({ mensaje: "Error al obtener características únicas", error });
+        console.error("Error al obtener nombres de características del producto_base:", error);
+        res.status(500).json({ mensaje: "Error al obtener nombres de características del producto_base", error });
     }
 }
+
 
 // Función para agregar un nuevo tipo de producto con características
 async function agregarTipoProducto(req, res) {

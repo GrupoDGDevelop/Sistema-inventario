@@ -213,10 +213,10 @@ El estado actual de proyecto se agregaron las siguientes funcionalidades funcion
 ## Cambios a futuro
 
 - Modificación y refactorización de código: Existen remanentes de código sobre consultas SQL del backend que no son necesarias y en algunos casos redundancias.
-- Modificar la estructuraa de la base de datos SQL: Debido a que se modifico la forma en la que se almacenan los productos en MongoDB, tablas de la base de datos de MongoDB ya no son necesarias.
+- Modificar la estructuraa de la base de datos SQL: Debido a que se modifico la forma en la que se almacenan los productos y responsivas en MongoDB, tablas de la base de datos de MySQL ya no son necesarias.
 - Departamentos y sucursales: Se debe modificar el sistema para que cada agencia, tenga relacionaados varios departamentos, los departamentos varios empleados.
 - Facturas en productos: Se debe agregar que los productos almacenen una factura.
-- Actualización de productos relacionados a cartas repsonsivas: Los productos que estén relacionados con una carta responsiva no deben ser seleccionadbles cuando se cree una nueva carta responsiva.
+- Actualización de productos relacionados a cartas repsonsivas: Los productos que estén relacionados con una carta responsiva no deben ser seleccionables cuando se cree una nueva carta responsiva.
 
 ## Información adicional
 
